@@ -1,0 +1,99 @@
+services:
+  frontend:
+    image: node:22-bookworm
+    working_dir: /workspace
+    command: sh -c "npm ci && npm run dev"
+    volumes:
+      - ./frontend:/workspace
+      - frontend_node_modules:/workspace/node_modules
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /workspace/backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/workspace/backend
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /workspace/backend
+    command: celery -A app.workers.celery_app.celery_app worker --loglevel=INFO
+    volumes:
+      - ./backend:/workspace/backend
+    env_file:
+      - .env
+    depends_on:
+      api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azurite_data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:10000/devstoreaccount1').then(r => process.exit(r.status >= 500 ? 1 : 0)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  frontend_node_modules:
+  mongo_data:
+  azurite_data:
+
