@@ -1,8 +1,8 @@
 # Enterprise AI Assistant
 
-This repository contains the initial runnable scaffold for the Enterprise AI Assistant.
+This repository contains the runnable foundation and backend authentication APIs for the Enterprise AI Assistant.
 
-The current scaffold intentionally does not implement authentication, document uploads, document ingestion, RAG, citations, or agentic operations. Frontend screens are clearly marked as placeholders.
+Account foundation (Step A), backend session APIs (Step B), Admin management/authorization (Step C), and frontend auth integration (Step D) are implemented. Admin user management is available to Admin accounts. Chat, document uploads, ingestion, RAG, citations and agentic operations remain planned placeholders.
 
 ## Prerequisites
 
@@ -54,7 +54,7 @@ npm run typecheck
 npm run build
 ```
 
-The frontend routes are working placeholders at `/home`, `/chat`, `/documents`, `/history`, `/settings`, `/login`, `/manager/upload`, `/admin`, and `/admin/users`. Authentication, uploads, ingestion, and RAG remain intentionally unimplemented.
+The frontend sign-in, session management, role-aware route shell and Admin user-management forms are connected to FastAPI. Chat, documents, history, manager uploads, analytics and audit browsing remain clearly labeled future placeholders. Frontend route checks do not replace backend authorization.
 
 The frontend currently uses Next.js `16.4.2`, React `19.3.1`, ESLint `10.13.0`,
 and `eslint-config-next` `16.4.2`. Next 16 uses native flat ESLint config,
@@ -113,7 +113,7 @@ Use `docker compose down -v` only when you intentionally want to remove local Mo
 - Backend locked install: passed with `uv sync --frozen --extra dev` and `backend/uv.lock`.
 - Backend tests: passed, 3 tests, with no Starlette/httpx deprecation warning.
 - Backend Ruff checks: passed.
-- Frontend locked install: passed with `npm ci` using `frontend/package-lock.json`. The first clean install took about three minutes because many registry tarballs were slow cache misses; npm logs showed downloads taking roughly 30–136 seconds. TLS remained enabled and the lockfile was preserved.
+- Frontend locked install: passed with `npm ci` using `frontend/package-lock.json`. The first clean install took about three minutes because many registry tarballs were slow cache misses; npm logs showed downloads taking roughly 30â€“136 seconds. TLS remained enabled and the lockfile was preserved.
 - Frontend lint: passed with `npm run lint` using Next 16 native flat config.
 - Frontend TypeScript: passed with `npm run typecheck`.
 - Frontend production build: passed with `npm run build` in an isolated temporary container, separate from the running Compose dev server.
@@ -138,10 +138,10 @@ The full audit retains five high development-only findings through this path:
 
 ```text
 eslint-config-next
-└── @next/eslint-plugin-next
-    └── fast-glob
-        └── micromatch
-            └── braces
+â””â”€â”€ @next/eslint-plugin-next
+    â””â”€â”€ fast-glob
+        â””â”€â”€ micromatch
+            â””â”€â”€ braces
 ```
 
 All five findings refer to `GHSA-vfj7-8cjw-p6xm` / `CVE-2026-93687`, affecting
@@ -159,7 +159,54 @@ warnings because some transitive lint plugins declare support through ESLint 9,
 but the actual ESLint 10 run passes; this is development-tool metadata rather
 than a production audit finding.
 
-## Planned next slice
+## Next operator check
 
-The next recommended implementation slice is Admin-created password/JWT authentication with `GET /api/v1/users/me`, role-aware navigation, and session-aware API requests. It should be implemented before uploads or RAG.
+To verify signed-in flows, start the local stack and create your own development Admin through the interactive bootstrap command in [Step A](docs/authentication-step-a.md). Then sign in at `http://localhost:3000`, verify `/admin/users`, and try creating an Employee account. Do not send your password to chat or place it in a command or tracked file. Authenticated refresh/logout and Admin-write browser checks have not been run because automated verification did not create credentials.
 
+
+
+## Authentication Step A - completed 26 October 2026
+
+Persistence models, indexes, three idempotent department seeds, and safe CLI-only
+first-Admin bootstrap are implemented. See [Step A setup and verification](docs/authentication-step-a.md)
+for commands, data preservation rules, model/API serialization and tests.
+
+The backend suite passes with 22 tests including real MongoDB, and Ruff passes.
+This establishes the account foundation; complete login/refresh security, CSRF,
+Admin operations and browser verification in Steps B-D before treating
+authentication as complete. No real Admin credentials were created by the agent.
+
+
+## Authentication Step B - completed 27 October 2026
+
+Backend login, session-bound CSRF restoration, strict refresh rotation/replay
+protection, logout/all and GET /api/v1/users/me are implemented. The full backend
+suite passes with 60 real MongoDB/Redis-backed tests, and Ruff passes.
+See [Step B protocol, verification and limitations](docs/authentication-step-b.md).
+The frontend still needs Step D's CSRF and refresh coordination updates; this is
+not yet a completed browser authentication experience. No packages were added.
+
+
+## Authentication Step C - completed 27 October 2026
+
+Admin user creation, cursor listing, updates/disabling, session invalidation and
+concurrent last-active-Admin protection are complete. The backend suite passes
+96 tests and the real HTTP Admin/authentication smoke passes. See
+[Step C contracts, local setup and interview notes](docs/authentication-step-c.md).
+
+Local MongoDB now uses a one-node replica set for transactions. Start it through
+`docker compose up -d --build api`; the one-shot `mongo-init` service exiting 0
+means initialization succeeded. Existing data volumes are preserved. Host-side
+tests/Compass use `mongodb://localhost:27017/?directConnection=true`.
+
+The next step is Step D frontend integration. No real accounts were created by
+the tests, and no dependency changes were needed.
+
+
+## Authentication Step D
+
+The frontend is served at `http://localhost:3000`. It uses the FastAPI `/api/v1/auth` and `/api/v1/admin` endpoints. For browser use, keep the API `FRONTEND_ORIGIN` set to `http://localhost:3000`; do not expose tokens in browser storage. To sign in locally, first start the stack, then create your real development Admin interactively as described in [Step A bootstrap instructions](docs/authentication-step-a.md). The CLI asks you for the password in the terminal; do not put it in a command, chat, or tracked file.
+
+From `frontend/`, run `npm run dev` when using the local Node installation. If you use the Compose frontend instead, stop the local dev server first because both use port 3000.
+
+Lint, typecheck and production build pass. HTTP checks confirmed all routes respond and signed-out Admin navigation returns to login. No Admin/test account was created by automated verification, so the authenticated browser lifecycle and Admin create/update interactions should be completed after you run the bootstrap command. See [Step D details](docs/authentication-step-d.md).

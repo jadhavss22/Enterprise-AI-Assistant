@@ -1,41 +1,42 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useAuth } from "../lib/auth-context";
+import { useState } from "react";
+import { AuthGate } from "./auth-gate";
+import { useAuth, type Role } from "../lib/auth-context";
 
-const navigation = [
-  ["Home", "/home"],
-  ["AI Chat", "/chat"],
-  ["Documents", "/documents"],
-  ["Chat History", "/history"],
-  ["Settings", "/settings"],
-] as const;
+const navigation: { label: string; href: string; roles?: Role[] }[] = [
+  { label: "Home", href: "/home" }, { label: "AI Chat", href: "/chat" },
+  { label: "Documents", href: "/documents" }, { label: "Chat History", href: "/history" },
+  { label: "Settings", href: "/settings" }, { label: "Manager uploads", href: "/manager/upload", roles: ["manager", "admin"] },
+  { label: "Admin workspace", href: "/admin", roles: ["admin"] }, { label: "User management", href: "/admin/users", roles: ["admin"] },
+];
 
-export function PlaceholderShell({ title, children }: { title: string; children: ReactNode }) {
-  const { user, loading, logout } = useAuth();
-  const role = user?.role;
-  return (
-    <main className="shell">
-      <nav className="sidebar" aria-label="Primary navigation">
-        <div className="brand">Enterprise AI Assistant</div>
-        <p className="badge">Frontend scaffold</p>
-        {navigation.map(([label, href]) => (
-          <Link key={href} href={href} className={href === "/" + title.toLowerCase() ? "active" : ""}>
-            {label}
-          </Link>
-        ))}
-        {(role === "manager" || role === "admin") && <><div className="sidebar-divider" /><Link href="/manager/upload">Manager upload</Link></>}
-        {role === "admin" && <><Link href="/admin">Admin workspace</Link><Link href="/admin/users">User management</Link></>}
-      </nav>
-      <section className="content">
-        <header className="header">
-          <span>WORKSPACE / {title}</span>
-          <span className="status">{loading ? "Restoring session" : user ? `${user.display_name} (${user.role})` : "Signed out"}</span>
-        </header>
-        {user && <button type="button" onClick={() => void logout()}>Sign out</button>}
-        {children}
-      </section>
-    </main>
-  );
+export function PlaceholderShell({ title, children, roles }: { title: string; children: ReactNode; roles?: Role[] }) {
+  return <AuthGate roles={roles}><Workspace title={title}>{children}</Workspace></AuthGate>;
+}
+
+function Workspace({ title, children }: { title: string; children: ReactNode }) {
+  const { user, logout } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function signOut() {
+    setBusy(true); setError(null);
+    try { await logout(); router.replace("/login"); }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Sign out failed. Retry."); }
+    finally { setBusy(false); }
+  }
+  return <main className="shell">
+    <aside className="sidebar"><Link href="/home" className="brand"><span className="brand-mark">E</span><span>Enterprise AI<small>ASSISTANT WORKSPACE</small></span></Link>
+      <p className="nav-caption">WORKSPACE</p><nav aria-label="Primary navigation">{navigation.filter((item) => !item.roles || item.roles.includes(user!.role)).map((item) => <Link key={item.href} href={item.href} className={`nav-link ${pathname === item.href ? "active" : ""}`}>{item.label}</Link>)}</nav>
+      <div className="sidebar-bottom"><span className="online-dot"/> Connected to your organization</div>
+    </aside>
+    <section className="content"><header className="header"><div><span className="breadcrumb">WORKSPACE</span><span className="breadcrumb-separator">/</span><strong>{title}</strong></div><div className="account-area"><div className="avatar">{user!.display_name.slice(0, 1).toUpperCase()}</div><div className="account-copy"><strong>{user!.display_name}</strong><span>{user!.role} · {user!.email}</span></div><button className="button subtle" type="button" onClick={() => void signOut()} disabled={busy}>{busy ? "Signing out…" : "Sign out"}</button></div></header>
+      {error && <p className="inline-error" role="alert">{error}</p>}{children}
+    </section>
+  </main>;
 }

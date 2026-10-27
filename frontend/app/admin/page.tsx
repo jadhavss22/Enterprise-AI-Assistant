@@ -1,5 +1,4 @@
-import { PlaceholderPage } from "../../src/components/placeholder-page";
+import Link from "next/link";
+import { PlaceholderShell } from "../../src/components/placeholder-shell";
 
-export default function AdminPage() {
-  return <PlaceholderPage title="Admin Workspace" description="Organization-wide publishing and administration are reserved for the Admin role." cards={[{ title: "Users", description: "Placeholder for Admin-created accounts." }, { title: "Documents", description: "Placeholder for audited organization-wide document controls." }, { title: "Audit", description: "Placeholder for access and publishing audit records." }]} />;
-}
+export default function AdminPage() { return <PlaceholderShell title="Admin Workspace" roles={["admin"]}><div className="page-wrap"><div className="page-heading"><p className="eyebrow">ADMINISTRATION</p><h1>Admin workspace</h1><p>Manage access to the organization workspace.</p></div><div className="home-grid"><Link className="feature-card" href="/admin/users"><span className="feature-icon">♙</span><h3>User management</h3><p>Create accounts, assign roles, and manage user access.</p><span className="card-link">Manage users →</span></Link><section className="feature-card planned"><span className="feature-icon">▤</span><h3>Document governance</h3><p>Organization-wide document controls will be added in a later phase.</p><span className="planned-label">PLANNED</span></section><section className="feature-card planned"><span className="feature-icon">◷</span><h3>Audit records</h3><p>Audit browsing is reserved for a later phase.</p><span className="planned-label">PLANNED</span></section></div></div></PlaceholderShell>; }

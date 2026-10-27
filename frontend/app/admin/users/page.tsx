@@ -1,15 +1,4 @@
-import { PlaceholderPage } from "../../../src/components/placeholder-page";
+import { AuthGate } from "../../../src/components/auth-gate";
+import { UserManagement } from "../../../src/components/user-management";
 
-export default function AdminUsersPage() {
-  return (
-    <PlaceholderPage
-      title="User Management"
-      description="Admin-created accounts and role assignment will be implemented in the authentication slice."
-      cards={[
-        { title: "Accounts", description: "Placeholder for creating and disabling user accounts." },
-        { title: "Roles", description: "Placeholder for Admin, Manager, and Employee role assignment." },
-        { title: "Audit", description: "Placeholder for audited account and access changes." },
-      ]}
-    />
-  );
-}
+export default function AdminUsersPage() { return <AuthGate roles={["admin"]}><UserManagement /></AuthGate>; }

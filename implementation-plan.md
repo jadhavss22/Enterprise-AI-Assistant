@@ -6,7 +6,7 @@ The approved frontend is Next.js with TypeScript and App Router under `frontend/
 
 ## Approved implementation constraints
 
-- Initial scaffold only; authentication, uploads, ingestion, RAG, citations, and agentic operations are placeholders.
+- Current delivery: Steps A-D (account foundation, backend sessions and Admin management, and frontend browser integration) are implemented; signed-in acceptance checks remain pending local Admin bootstrap. Uploads, ingestion, RAG, citations and agentic operations are deferred to their approved phases.
 - Private sharing stays within the uploader's department; Admin access is retained and audited.
 - Saved answers are hidden when supporting documents become inaccessible, and source access is rechecked.
 - Azure Container Apps is the provisional Next.js deployment target; final validation and paid provisioning are deferred.
@@ -114,3 +114,90 @@ This proposal is derived from the approved PRD/SDD requirements for Admin-create
 - Audit events contain metadata only and capture successful and rejected security actions.
 - Local HTTP cookie behavior works only in the development profile; production configuration requires HTTPS and Secure cookies.
 
+
+## Planning review - 24 October 2026
+
+Scaffold maintenance is accepted as complete based on the reported verification. Authentication remains work in progress. See [the reviewed authentication plan](docs/authentication-plan-2026-10-24.md) for the current scope, tracked dependency issues, contract corrections, files, dependencies, APIs and acceptance tests. This dated plan supersedes contradictory earlier proposals above, including HTTP bootstrap and /auth/me. No application code changed in this review.
+
+
+
+## Step A completion - 26 October 2026
+
+Completed on `codex/authentication` in the Desktop repository. Canonical BSON
+models now use ObjectId references, uppercase stored roles/statuses,
+`auth_sessions` and `audit_logs`; frontend serialization remains compatible.
+Unique indexes, three idempotent department seeds, interactive Argon2id Admin
+bootstrap, concurrent bootstrap protection, audit recovery and legacy-data
+preflight are implemented. Existing WIP auth modules were adapted only to the
+storage contract; their Step B security limitations remain pending.
+
+Verification: 22 backend tests passed against local MongoDB, including
+concurrent/repeated bootstrap, invalid departments, duplicate users, existing
+disabled Admin, audit recovery, CLI safety, data preservation and auth storage
+compatibility. Ruff passes. No dependency changes or lockfile updates required.
+No existing application auth data was migrated or deleted, and no real Admin
+credentials were created. See [Step A details](docs/authentication-step-a.md).
+
+Next: Step B login, complete refresh reuse/concurrency behavior, logout/all,
+token-version enforcement, CSRF/origin checks, rate limits and security audits.
+Continue interview review before implementing the next step. No uploads/RAG.
+
+Step A final runtime verification: rebuilt API plus MongoDB/Redis/Azurite healthy; liveness/readiness HTTP 200; bootstrap CLI available; application users=0 and departments=3; disposable test databases=0. Frozen lock consistency and diff checks passed. No commit or push performed.
+
+
+
+## Step B completion - 27 October 2026
+
+Backend authentication is implemented: login, GET /api/v1/auth/csrf, strict
+refresh rotation and replay-family revocation, logout/all, GET /api/v1/users/me,
+current account/session/role/department checks and token-version invalidation.
+Cookie lifetime never extends the absolute one-day session; JWT lifetime is
+ten minutes or remaining session time. History is bounded by a configurable
+rotation cap, with reauthentication instead of dropping replay evidence.
+
+Redis limits are atomic and audit events contain metadata only. Redis/audit
+failures block credential issuance. Hosted profiles reject insecure cookie/key
+settings. Frontend CSRF/refresh integration remains Step D and is not claimed
+complete. No new dependencies or lockfile changes were required.
+
+Verification: 60 backend tests passed against real MongoDB/Redis, and Ruff
+passed. See [Step B details](docs/authentication-step-b.md) for endpoints,
+commands, implementation tradeoffs, failure policy and remaining production
+prerequisites. Next is Step C Admin user management and authorization, followed
+by Step D browser integration. No uploads/RAG and no commit/push in this slice.
+
+Step B final runtime checks passed: isolated real HTTP session lifecycle smoke, API liveness/readiness HTTP 200, all required local API dependencies healthy, frozen/offline lock consistency. Step C is next; Step D frontend integration remains pending.
+
+
+
+## Step C completion - 27 October 2026
+
+Implemented Admin-only user creation, bounded/filterable cursor listing,
+updates/disabling, security-change session invalidation, last-active-Admin
+protection, read-only active department choices, rate limits and private audits.
+Admin mutations use a shared guard write inside a snapshot/majority transaction,
+with current actor revalidation. This prevents concurrent last-Admin removal and
+commits user/session changes with their success audit. Audit failure rollback
+and concurrent self-demotion/mutual disabling were tested on a real replica set.
+
+Local Compose MongoDB now uses single-node rs0 with an idempotent one-shot
+initializer; the existing data volume was retained. Host integration fixtures
+connect directly to the mapped port. No real accounts were migrated or created.
+
+Verification: 96 A/B/C tests passed; Ruff, Compose validation and offline lock
+checks passed. Real HTTP Admin/authentication smoke passed; API liveness/readiness
+HTTP 200. No dependencies changed, no commit or push performed. Details and
+interview questions: [Step C](docs/authentication-step-c.md).
+
+Next: Step D frontend session/CSRF handling, refresh coordination, Admin forms,
+role-aware navigation and browser acceptance. Uploads and RAG remain deferred.
+
+Maintenance note DEP-03: the existing Motor driver is deprecated, with critical
+fixes documented until May 2027. Plan its PyMongo Async migration before
+production; no driver change was folded into this feature. Source:
+https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_motor_client_session.html
+
+
+## Step D frontend integration — implementation complete; signed-in acceptance pending
+
+The browser now integrates memory-only access tokens, the backend-issued CSRF token, HttpOnly refresh-cookie restoration and rotation, cross-tab refresh locking, session logout/logout-all, user revalidation, guarded routes, role-aware navigation, profile/session settings, and Admin account create/list/filter/update forms. See [Step D](docs/authentication-step-d.md). Lint, typecheck, production build, API health, unauthenticated route smoke, and signed-out Admin-route redirect checks passed. End-to-end sign-in and Admin write verification await a real development Admin account created interactively by the operator. No uploads or RAG were implemented.

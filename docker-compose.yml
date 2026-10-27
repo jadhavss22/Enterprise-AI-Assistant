@@ -29,6 +29,8 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
+      mongo-init:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       azurite:
@@ -57,6 +59,7 @@ services:
 
   mongo:
     image: mongo:8
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
@@ -66,6 +69,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  mongo-init:
+    image: mongo:8
+    entrypoint: ["mongosh", "--host", "mongo:27017", "--quiet", "/scripts/init-replica.js"]
+    volumes:
+      - ./infra/mongo/init-replica.js:/scripts/init-replica.js:ro
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: "no"
 
   redis:
     image: redis:7-alpine
