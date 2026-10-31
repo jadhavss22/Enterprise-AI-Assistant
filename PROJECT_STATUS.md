@@ -6,7 +6,7 @@ All five findings in the 30 October review now have implemented fixes. Fresh ful
 
 Credential scan found no real private-key/API-key/password matches in candidate source files. Private .env, environments, node_modules and generated output remain ignored. Optional Azure OpenAI, OCR, production load/deployment hardening and permission-aware semantic retrieval remain outside this milestone. The earlier review and pending notes below are historical; this checkpoint supersedes their resolved items.
 
-Branch: dev. Preceding verified commit: 2a8369e. Feature checkpoint commit/push is the next action; use Git history and remote verification for its final hash. No changes to main are authorized. Next feature: permission-aware document retrieval, including current ACL checks before returning chunk content and use of only active index versions.
+Branch: dev. Preceding verified commit: 2a8369e. Feature checkpoint committed locally as 40449f8 (feat: complete document upload and ingestion with access controls). Push to origin/dev was attempted but GitHub rejected the stored credentials (Invalid username or token). No remote backup of dev is claimed. Reauthenticate GitHub through VS Code/Git Credential Manager, then run git push -u origin dev and verify the remote hash. No changes to main are authorized. Next feature: permission-aware document retrieval, including current ACL checks before returning chunk content and use of only active index versions.
 
 # Project status and recovery tracker
 
