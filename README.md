@@ -1,8 +1,10 @@
 # Enterprise AI Assistant
 
+For the current delivery status, verification record, and recovery steps, read [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
 This repository contains the runnable foundation and backend authentication APIs for the Enterprise AI Assistant.
 
-Account foundation (Step A), backend session APIs (Step B), Admin management/authorization (Step C), and frontend auth integration (Step D) are implemented. Admin user management is available to Admin accounts. Chat, document uploads, ingestion, RAG, citations and agentic operations remain planned placeholders.
+Account foundation (Step A), backend session APIs (Step B), Admin management/authorization (Step C), and frontend auth integration (Step D) are implemented. Document upload, access controls, source downloads, staged ingestion, and Admin job monitoring are now implemented. Chat/RAG, citations, and agentic operations remain later project phases.
 
 ## Prerequisites
 
@@ -159,9 +161,9 @@ warnings because some transitive lint plugins declare support through ESLint 9,
 but the actual ESLint 10 run passes; this is development-tool metadata rather
 than a production audit finding.
 
-## Next operator check
+## Authentication operator note
 
-To verify signed-in flows, start the local stack and create your own development Admin through the interactive bootstrap command in [Step A](docs/authentication-step-a.md). Then sign in at `http://localhost:3000`, verify `/admin/users`, and try creating an Employee account. Do not send your password to chat or place it in a command or tracked file. Authenticated refresh/logout and Admin-write browser checks have not been run because automated verification did not create credentials.
+You have already bootstrapped a local Admin, created an Employee account through the frontend, and signed into the workspace. For the latest automated browser/backend evidence and any remaining auth verification gaps, use [PROJECT_STATUS.md](PROJECT_STATUS.md). Never put a password in a command, chat message, or tracked file.
 
 
 
@@ -209,4 +211,45 @@ The frontend is served at `http://localhost:3000`. It uses the FastAPI `/api/v1/
 
 From `frontend/`, run `npm run dev` when using the local Node installation. If you use the Compose frontend instead, stop the local dev server first because both use port 3000.
 
-Lint, typecheck and production build pass. HTTP checks confirmed all routes respond and signed-out Admin navigation returns to login. No Admin/test account was created by automated verification, so the authenticated browser lifecycle and Admin create/update interactions should be completed after you run the bootstrap command. See [Step D details](docs/authentication-step-d.md).
+Lint, typecheck and production build passed at the Step D checkpoint. The user later confirmed Admin bootstrap, Employee creation, and successful sign-in in the browser. The latest automated browser coverage and exact remaining gaps are recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md). See [Step D protocol](docs/authentication-step-d.md).
+
+## Document upload and ingestion
+
+The Documents page is available to signed-in users. Managers and Admins can upload PDF, DOCX, and TXT files up to 20 MB. The API validates the file signature/content, stores originals in the private local Azurite container, records a durable MongoDB job, and dispatches extraction/chunking/embedding/indexing to Celery. The UI shows named processing stages; Admins can inspect failed jobs at `/admin/ingestion-jobs` and request a controlled retry. Source download, visibility checks, duplicate detection, soft deletion, and scoped permissions are enforced by FastAPI. Managers can manage their own documents and authorize active colleagues in the same department for private documents.
+
+Local Azurite works without a cloud storage secret. Embeddings default to the local CPU model `sentence-transformers/all-MiniLM-L6-v2`, so Azure OpenAI is not required for local embedding development. Put any private provider values in the ignored `.env` file (never in chat or tracked files):
+
+- `EMBEDDING_PROVIDER`: `local` (default) or `azure_openai`.
+- `LOCAL_EMBEDDING_MODEL`: defaults to `sentence-transformers/all-MiniLM-L6-v2`.
+- `LOCAL_EMBEDDING_DIMENSIONS`: must remain `384` for this model.
+- `LOCAL_EMBEDDING_BATCH_SIZE`: defaults to `8` for CPU-only laptops. Celery is configured for one active ingestion task per worker.
+
+- `AZURE_OPENAI_ENDPOINT`: your Azure OpenAI resource endpoint.
+- `AZURE_OPENAI_API_KEY`: key for that resource.
+- `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`: the embedding deployment name configured in Azure.
+- `AZURE_OPENAI_EMBEDDING_DIMENSIONS`: must match that deployment and Pinecone index when `EMBEDDING_PROVIDER=azure_openai` (the template default is 1536).
+- `AZURE_OPENAI_EMBEDDING_MAX_INPUT_TOKENS`: input limit used by Azure-mode chunk validation.
+- `PINECONE_API_KEY` and `PINECONE_INDEX_NAME`: credentials and name for the index whose dimension matches the configured embedding deployment.
+
+The local provider loads the model once per Celery worker process, runs on CPU, and uses small batches. Chunking uses the selected provider tokenizer and rejects a configured chunk size above the provider's actual input limit instead of allowing silent truncation. For the local MiniLM model, the sentence-transformers limit is discovered at runtime and the default 200-token chunks leave room for special tokens. Azure OpenAI remains optional; when selected, its deployment, endpoint, key, dimensions, and input limit must be configured explicitly. If Pinecone or the selected embedding provider is absent, upload/storage still runs locally, but the job reports a safe configuration failure instead of pretending the document is indexed. After configuring the provider and index, an Admin can retry the failed job. OCR for scanned PDFs and RAG/chat are not part of this slice.
+
+Create the Pinecone index before retrying ingestion with these exact local-provider settings:
+
+```text
+dimension: 384
+metric: cosine
+cloud/region: choose the deployment region approved for your account
+```
+
+The index dimension must match the selected provider. Do not reuse a 1536-dimension Azure index for local MiniLM vectors.
+
+Rebuild after changing dependencies or service configuration with `docker compose up -d --build`. Local TXT/PDF/DOCX ingestion and source downloads have been exercised with Azurite, CPU embeddings, and Pinecone; see [PROJECT_STATUS.md](PROJECT_STATUS.md) for evidence and remaining production limits. Azure OpenAI remains optional and unverified.
+
+
+### Blob storage compatibility
+
+The backend requires the `azure-storage-blob[aio]` dependency extra for async uploads
+and source downloads. API and worker clients use `AZURE_STORAGE_API_VERSION`
+(default `2023-11-03`) so the locked Azure SDK works with local Azurite without
+skipping API-version checks. Blob uploads apply MIME metadata using `ContentSettings`.
+Unexpected API errors return sanitized JSON with a request ID and preserve CORS headers.

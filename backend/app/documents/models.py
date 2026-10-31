@@ -1,0 +1,33 @@
+from enum import StrEnum
+
+
+class DocumentVisibility(StrEnum):
+    PRIVATE = "PRIVATE"
+    DEPARTMENT = "DEPARTMENT"
+    ORGANIZATION = "ORGANIZATION"
+
+
+class DocumentStatus(StrEnum):
+    QUEUED = "QUEUED"
+    PROCESSING = "PROCESSING"
+    READY = "READY"
+    FAILED = "FAILED"
+    OCR_REQUIRED = "OCR_REQUIRED"
+    DELETED = "DELETED"
+
+
+class IngestionStatus(StrEnum):
+    QUEUED = "QUEUED"
+    PROCESSING = "PROCESSING"
+    SUCCEEDED = "SUCCEEDED"
+    FAILED = "FAILED"
+
+
+class IngestionStage(StrEnum):
+    VALIDATING = "VALIDATING"
+    EXTRACTING = "EXTRACTING"
+    CHUNKING = "CHUNKING"
+    EMBEDDING = "EMBEDDING"
+    INDEXING = "INDEXING"
+    VERIFYING = "VERIFYING"
+    COMPLETE = "COMPLETE"

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -6,11 +8,27 @@ class Settings(BaseSettings):
     app_env: str = "development"
     api_host: str = "0.0.0.0"
     api_port: int = 8000
-    mongodb_url: str = "mongodb://mongo:27017"
+    mongodb_url: str = "mongodb://mongo:27017/?replicaSet=rs0"
     mongodb_database: str = "enterprise_ai"
     redis_url: str = "redis://redis:6379/0"
     azure_blob_endpoint: str = "http://azurite:10000/devstoreaccount1"
     azure_blob_container: str = "documents"
+    azure_storage_api_version: str = "2023-11-03"
+    azure_storage_connection_string: str | None = Field(default=None, repr=False)
+    azure_openai_endpoint: str | None = None
+    azure_openai_api_key: str | None = Field(default=None, repr=False)
+    azure_openai_api_version: str = "v1"
+    azure_openai_embedding_deployment: str | None = None
+    azure_openai_embedding_dimensions: int = Field(default=1536, ge=1, le=8192)
+    azure_openai_embedding_max_input_tokens: int = Field(default=8191, ge=1, le=32768)
+    embedding_provider: Literal["local", "azure_openai"] = "local"
+    local_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    local_embedding_dimensions: int = Field(default=384, ge=1, le=4096)
+    local_embedding_batch_size: int = Field(default=8, ge=1, le=64)
+    pinecone_index_name: str | None = None
+    document_chunk_size: int = Field(default=200, ge=1, le=2000)
+    document_chunk_overlap: int = Field(default=40, ge=0, le=1999)
+    document_upload_rate_limit: int = Field(default=20, ge=1, le=1000)
     health_check_timeout_seconds: float = 2.0
     frontend_origin: str = "http://localhost:3000"
     jwt_secret_key: str = Field(

@@ -7,7 +7,7 @@ export type User = { user_id: string; email: string; display_name: string; role:
 type AuthPayload = { access_token: string; token_type: "bearer"; expires_in: number; user: User; csrf_token: string; session_expires_at: string };
 export type AuthStatus = "loading" | "authenticated" | "anonymous" | "unavailable";
 export type ApiError = Error & { status: number; code: string; requestId?: string; retryAfter?: string };
-type ContextValue = { user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
+type ContextValue = { user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; download: (path: string, filename: string) => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
 
 const Context = createContext<ContextValue | undefined>(undefined);
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
@@ -164,6 +164,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [refresh, user]);
 
+  const download = useCallback(async (path: string, filename: string) => {
+    if (!tokenRef.current || !user) throw new Error("Sign in to continue.");
+    const identity = user.user_id;
+    const send = async (token: string) => {
+      const url = new URL(path.replace(/^\//, ""), API_BASE.replace(/\/$/, "") + "/");
+      if (url.origin !== new URL(API_BASE).origin || !path.startsWith("/") || path.startsWith("//") || path.includes("..")) {
+        throw new Error("API requests must use a safe relative path.");
+      }
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          headers: { Authorization: "Bearer " + token },
+          credentials: "include",
+          cache: "no-store",
+          signal: AbortSignal.timeout(60000),
+        });
+      } catch {
+        throw new Error("The API is unreachable. Check that the local services are running, then retry.");
+      }
+      if (!response.ok) {
+        let payload: unknown;
+        try { payload = await response.json(); } catch { payload = undefined; }
+        throw apiError(response, payload);
+      }
+      const objectUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      link.rel = "noopener";
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    };
+    try { await send(tokenRef.current); }
+    catch (error) {
+      if ((error as ApiError).status !== 401) throw error;
+      await refresh();
+      if (!tokenRef.current || userRef.current?.user_id !== identity) throw new Error("Your session changed. Please retry this action.");
+      await send(tokenRef.current);
+    }
+  }, [refresh, user]);
+
   const logout = useCallback(async () => {
     await lock(async () => {
       const csrf = csrfRef.current ?? (await fetchJson<{ csrf_token: string }>("/auth/csrf")).csrf_token;
@@ -226,7 +267,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
   }, [revalidate, status]);
 
-  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, api }), [api, login, logout, logoutAll, message, refresh, status, user]);
+  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, download, api }), [api, download, login, logout, logoutAll, message, refresh, status, user]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

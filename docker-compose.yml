@@ -49,6 +49,26 @@ services:
     command: celery -A app.workers.celery_app.celery_app worker --loglevel=INFO
     volumes:
       - ./backend:/workspace/backend
+      - huggingface_cache:/var/cache/huggingface
+    env_file:
+      - .env
+    environment:
+      HF_HOME: /var/cache/huggingface
+      HF_HUB_DISABLE_XET: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /workspace/backend
+    command: celery -A app.workers.celery_app.celery_app beat --loglevel=INFO
+    volumes:
+      - ./backend:/workspace/backend
     env_file:
       - .env
     depends_on:
@@ -109,4 +129,5 @@ volumes:
   frontend_node_modules:
   mongo_data:
   azurite_data:
+  huggingface_cache:
 

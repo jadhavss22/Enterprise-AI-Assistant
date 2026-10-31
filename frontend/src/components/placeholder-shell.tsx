@@ -12,6 +12,7 @@ const navigation: { label: string; href: string; roles?: Role[] }[] = [
   { label: "Documents", href: "/documents" }, { label: "Chat History", href: "/history" },
   { label: "Settings", href: "/settings" }, { label: "Manager uploads", href: "/manager/upload", roles: ["manager", "admin"] },
   { label: "Admin workspace", href: "/admin", roles: ["admin"] }, { label: "User management", href: "/admin/users", roles: ["admin"] },
+  { label: "Ingestion jobs", href: "/admin/ingestion-jobs", roles: ["admin"] },
 ];
 
 export function PlaceholderShell({ title, children, roles }: { title: string; children: ReactNode; roles?: Role[] }) {

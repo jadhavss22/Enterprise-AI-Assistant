@@ -13,6 +13,9 @@ from app.auth.routes import users_router
 from app.auth.security import validate_security_settings
 from app.auth.storage import ensure_auth_storage
 from app.config import settings
+from app.documents.body_limit import UploadBodyLimitMiddleware
+from app.documents.routes import router as documents_router
+from app.documents.storage import ensure_document_storage
 from app.infrastructure.health import check_dependencies
 
 
@@ -42,6 +45,7 @@ async def lifespan(application: FastAPI):
                 "Admin transactions require a MongoDB replica set; start the mongo-init Compose service"
             )
         await ensure_auth_storage(application.state.db)
+        await ensure_document_storage(application.state.db)
         yield
     finally:
         mongo_client.close()
@@ -49,18 +53,27 @@ async def lifespan(application: FastAPI):
 
 
 app = FastAPI(title="Enterprise AI Assistant API", version="0.1.0", lifespan=lifespan)
+install_auth_errors(app)
+app.add_middleware(UploadBodyLimitMiddleware)
+# CORS must wrap the request/error middleware so failures reach browser clients.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[settings.frontend_origin.rstrip("/")],
     allow_credentials=True,
     expose_headers=["Retry-After", "X-Request-ID"],
     allow_methods=["GET", "POST", "PATCH", "DELETE"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "X-CSRF-Token"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "X-Request-ID",
+        "X-CSRF-Token",
+        "Idempotency-Key",
+    ],
 )
-install_auth_errors(app)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(admin_users_router)
+app.include_router(documents_router)
 
 
 @app.get("/health/live", tags=["health"])
