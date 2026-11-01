@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { DocumentSearch } from "./document-search";
 import { PlaceholderShell } from "./placeholder-shell";
 import { useAuth, type ApiError } from "../lib/auth-context";
 
@@ -175,6 +176,8 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
       <div className="page-heading"><div><p className="eyebrow">KNOWLEDGE LIBRARY</p><h1>{uploadOnly ? "Upload documents" : "Documents"}</h1><p>{uploadOnly ? "Upload a source file and follow its processing stages." : "Browse files your account is allowed to access."}</p></div>
         {!uploadOnly && canUpload && <Link className="button primary" href="/manager/upload">Upload document</Link>}
       </div>
+
+      {!uploadOnly && <DocumentSearch />}
 
       {canUpload && <section className="panel document-upload">
         <div><h2>{uploadOnly ? "New upload" : "Add a document"}</h2><p className="muted-note">PDF, DOCX, or TXT · Maximum 20 MB</p></div>

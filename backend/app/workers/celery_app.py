@@ -6,9 +6,11 @@ celery_app = Celery(
     "enterprise_ai_assistant",
     broker=settings.redis_url,
     backend=settings.redis_url,
-    include=["app.ingestion.tasks"],
+    include=["app.ingestion.tasks", "app.retrieval.tasks"],
 )
 celery_app.conf.task_default_queue = "default"
+# Retrieval vectors and task results are ephemeral, never a conversation store.
+celery_app.conf.result_expires = 60
 celery_app.conf.task_acks_late = True
 celery_app.conf.task_reject_on_worker_lost = True
 celery_app.conf.worker_prefetch_multiplier = 1

@@ -13,15 +13,25 @@ MAX_UPLOAD_BODY_BYTES = MAX_UPLOAD_BYTES + 64 * 1024
 
 
 class UploadBodyLimitMiddleware:
-    def __init__(self, app, max_body_bytes=MAX_UPLOAD_BODY_BYTES):
+    def __init__(
+        self,
+        app,
+        max_body_bytes=MAX_UPLOAD_BODY_BYTES,
+        path="/api/v1/documents",
+        error_code="FILE_TOO_LARGE",
+        error_message="Files must be 20 MB or smaller",
+    ):
         self.app = app
         self.max_body_bytes = max_body_bytes
+        self.path = path
+        self.error_code = error_code
+        self.error_message = error_message
 
     async def __call__(self, scope, receive, send):
         if (
             scope["type"] != "http"
             or scope["method"] != "POST"
-            or scope["path"].rstrip("/") != "/api/v1/documents"
+            or scope["path"].rstrip("/") != self.path
         ):
             return await self.app(scope, receive, send)
 
@@ -50,8 +60,8 @@ class UploadBodyLimitMiddleware:
                     receive,
                     send,
                     413,
-                    "FILE_TOO_LARGE",
-                    "Files must be 20 MB or smaller",
+                    self.error_code,
+                    self.error_message,
                 )
 
         consumed = 0
@@ -70,8 +80,8 @@ class UploadBodyLimitMiddleware:
                     raise HTTPException(
                         413,
                         detail={
-                            "code": "FILE_TOO_LARGE",
-                            "message": "Files must be 20 MB or smaller",
+                            "code": self.error_code,
+                            "message": self.error_message,
                         },
                     )
             return message
@@ -88,8 +98,8 @@ class UploadBodyLimitMiddleware:
                         receive,
                         send,
                         413,
-                        "FILE_TOO_LARGE",
-                        "Files must be 20 MB or smaller",
+                        self.error_code,
+                        self.error_message,
                     )
                 return
             await send(message)

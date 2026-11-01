@@ -253,3 +253,13 @@ and source downloads. API and worker clients use `AZURE_STORAGE_API_VERSION`
 (default `2023-11-03`) so the locked Azure SDK works with local Azurite without
 skipping API-version checks. Blob uploads apply MIME metadata using `ContentSettings`.
 Unexpected API errors return sanitized JSON with a request ID and preserve CORS headers.
+
+## Permission-aware document search
+
+Sign in and open Documents, then use **Search documents** to ask a short question such as “What are the support hours?” or “Who approves leave requests?”. The panel returns matching passages and authorized source downloads; answer generation and chat streaming are later slices.
+
+`POST /api/v1/retrieval/search` accepts `{"query":"your question"}`. MongoDB controls current visibility and active versions; deleted, revoked or obsolete sources are discarded before text is returned. The search uses the same CPU embedding model as ingestion through the existing Celery worker. Restart API/worker after updating code (`docker compose restart api worker scheduler`); there are no new dependencies. A cold or busy worker can return a retryable search-busy error. Task results are ephemeral (60-second TTL), and query arguments/result vectors are redacted from normal Celery log representations.
+
+The initial search bound is 25 authorized active document versions, four concurrent namespace calls per search, 20 merged candidates and up to five passages. The provisional cosine cutoff is 0.25, calibrated only on the invented fixture dataset. More than the supported document bound returns an explicit scope-limit error, not partial results. Settings are documented in `.env.example`; preserve the existing embedding model/index pairing.
+
+See [retrieval plan and verification](docs/retrieval-plan.md) and [calibration results](evaluation/retrieval-baseline-v1-results.json). Optional live fixture evaluation inside the API container: `python -m scripts.retrieval_live_check --dataset /path/to/retrieval-baseline-v1.json`. It requires the three synthetic fixtures to exist, real Pinecone credentials configured privately, and a running worker; it creates disposable auth state and reads vectors without upserting them.

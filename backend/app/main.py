@@ -17,6 +17,7 @@ from app.documents.body_limit import UploadBodyLimitMiddleware
 from app.documents.routes import router as documents_router
 from app.documents.storage import ensure_document_storage
 from app.infrastructure.health import check_dependencies
+from app.retrieval.routes import router as retrieval_router
 
 
 @asynccontextmanager
@@ -55,6 +56,13 @@ async def lifespan(application: FastAPI):
 app = FastAPI(title="Enterprise AI Assistant API", version="0.1.0", lifespan=lifespan)
 install_auth_errors(app)
 app.add_middleware(UploadBodyLimitMiddleware)
+app.add_middleware(
+    UploadBodyLimitMiddleware,
+    path="/api/v1/retrieval/search",
+    max_body_bytes=16384,
+    error_code="QUERY_BODY_TOO_LARGE",
+    error_message="Search request is too large",
+)
 # CORS must wrap the request/error middleware so failures reach browser clients.
 app.add_middleware(
     CORSMiddleware,
@@ -74,6 +82,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(admin_users_router)
 app.include_router(documents_router)
+app.include_router(retrieval_router)
 
 
 @app.get("/health/live", tags=["health"])

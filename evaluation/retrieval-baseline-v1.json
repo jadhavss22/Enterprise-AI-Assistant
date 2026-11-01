@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "purpose": "Small synthetic baseline; not a production quality gate",
+  "cases": [
+    {
+      "id": "leave-allowance",
+      "query": "How many annual leave days does Cedar Demo provide?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ]
+    },
+    {
+      "id": "leave-approval",
+      "query": "Who must approve an employee leave request?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ]
+    },
+    {
+      "id": "helpdesk-hours",
+      "query": "What days and hours is the IT help desk open?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ]
+    },
+    {
+      "id": "support-hours",
+      "query": "When does Cedar Demo support operate?",
+      "expected": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ]
+    },
+    {
+      "id": "training-budget",
+      "query": "What is the yearly training reimbursement limit?",
+      "expected": [
+        "qa-training-policy.docx"
+      ]
+    },
+    {
+      "id": "training-currency",
+      "query": "How many demo credits are reimbursed for training each year?",
+      "expected": [
+        "qa-training-policy.docx"
+      ]
+    },
+    {
+      "id": "unrelated-astronomy",
+      "query": "What is the mass of the planet Neptune?",
+      "expected": []
+    },
+    {
+      "id": "unrelated-cooking",
+      "query": "How do I bake a chocolate cake?",
+      "expected": []
+    }
+  ]
+}

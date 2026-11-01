@@ -29,6 +29,15 @@ class Settings(BaseSettings):
     document_chunk_size: int = Field(default=200, ge=1, le=2000)
     document_chunk_overlap: int = Field(default=40, ge=0, le=1999)
     document_upload_rate_limit: int = Field(default=20, ge=1, le=1000)
+    retrieval_max_documents: int = Field(default=25, ge=1, le=100)
+    retrieval_candidate_limit: int = Field(default=20, ge=5, le=100)
+    retrieval_result_limit: int = Field(default=5, ge=1, le=5)
+    retrieval_min_score: float = Field(default=0.25, ge=-1, le=1)
+    retrieval_search_concurrency: int = Field(default=4, ge=1, le=8)
+    retrieval_embedding_timeout_seconds: int = Field(default=20, ge=1, le=30)
+    retrieval_namespace_timeout_seconds: int = Field(default=8, ge=1, le=15)
+    retrieval_search_timeout_seconds: int = Field(default=20, ge=1, le=30)
+    retrieval_rate_limit: int = Field(default=10, ge=1, le=120)
     health_check_timeout_seconds: float = 2.0
     frontend_origin: str = "http://localhost:3000"
     jwt_secret_key: str = Field(

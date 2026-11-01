@@ -1,3 +1,29 @@
+## Retrieval commit checkpoint — 1 November 2026
+
+User authorized committing all pending retrieval files and pushing this checkpoint to dev. This is an implementation/review checkpoint, not a declaration that the five open review findings or recovery E2 have been resolved. Preserve startup warm-up, cache-only loading, model readiness, clearer retry messaging, provider-work lifetime bounds and active-version chunk-count consistency as next work. Complete the review fixes and end-to-end recovery verification before proceeding to query rewrite/answer generation.
+
+Included: permission-aware search backend/UI, regression tests, synthetic evaluation fixtures/results, operational limitations, review report and tracker. Prior verified baseline is 8716964; use git log and git branch -vv for this checkpoint's generated commit ID and remote synchronization. This entry is written before the commit/push, so it does not claim a successful push in advance.
+
+Latest fresh review evidence: five retrieval tests passed in 22.19 seconds with isolated MongoDB/Redis and provider doubles; backend Ruff, frontend ESLint/TypeScript and diff checks passed. Earlier full-suite/build/live-calibration evidence remains dated separately. Basic candidate-file credential scan found no matching secret patterns; ignored .env remains excluded. Application code was not modified by the review or this checkpoint operation.
+
+## Current retrieval review checkpoint — 1 November 2026
+
+The uncommitted permission-aware retrieval slice was reviewed against baseline 8716964. Five open findings: actual provider work can outlive/reuse concurrency permits; pending reprocessing chunk counts can suppress old active-version passages; user queries still trigger cold model loads; retrieval/model readiness is separate from and absent in current core health checks; and retry UI discards structured codes, Retry-After and safe request IDs. Startup warm-up, cache-only loading, model readiness and clearer retry messaging remain explicit work items.
+
+Fresh verification: five retrieval tests passed in 22.19 seconds using isolated real MongoDB/Redis authentication and provider doubles; full backend Ruff, frontend ESLint/TypeScript and diff checks passed. Two focused provider-double probes reproduced the outstanding-work and active-version count problems. No application code, live providers, private configuration, commits or pushes were changed. No full-suite/production-build/browser rerun is claimed in this review.
+
+E2 recovery is still open: the observed later PineconeConnectionError is independent of cold model load and needs a successful authorized response after connectivity restoration. See [retrieval review](docs/review-retrieval-2026-11-01.md) for priorities, exact code locations, test limits and next steps. Do not treat the prior implementation/calibration success as evidence that these operational issues are resolved.
+
+## Current retrieval checkpoint — 31 October 2026
+
+Approved permission-aware semantic retrieval is implemented on dev and remains UNCOMMITTED. Added backend/app/retrieval (typed POST /api/v1/retrieval/search, current session/ACL/deletion/active-version revalidation, stable chunk identity validation, bounded namespace search, short-lived worker query embeddings, safe failures, rate/request limits), a Documents search panel, real-auth provider-double regressions, an opt-in live evaluation runner, and versioned synthetic calibration data/results. No new dependencies, model subscriptions, answer generation, chat history, query rewrite, streaming, hybrid search or reranking were added.
+
+Fresh checks: 118 backend tests passed in 347.37 seconds; Ruff, frontend full ESLint, TypeScript, uv lock check (126 packages) and diff checks passed. Isolated production build and headless rendered search UI regression passed. The first build was sandbox-blocked (spawn EPERM); its approved rerun passed. Live Celery/CPU MiniLM/Pinecone search through the ASGI endpoint with disposable real authentication returned HTTP 200 for all 8 synthetic cases. Cutoff 0.3 missed 1/6 relevant questions; provisional cutoff 0.25 recovered all 6 and retained empty results on both unrelated questions. These are source-document Recall@5 calibration results on a tiny reused dataset, not production/holdout quality guarantees. No uploaded documents, original ACLs or Pinecone vectors were changed by evaluation.
+
+API, worker and scheduler were restarted and running; API/MongoDB/Redis/Azurite healthy. User Chrome acceptance for the NEW search panel is pending. Source download remains backend-authorized. The single worker can be busy/cold; explicit retry errors are expected. Model changes require reindexing even if dimensions match. Scope is limited to 25 authorized active documents by default; larger-scale retrieval/index layout and load targets require measurement. Review docs/retrieval-plan.md for the contract, limits and exact verification boundaries.
+
+Previous upload checkpoint 8716964 was independently verified on origin/dev via git ls-remote today. The older authentication-failed push note below is historical and resolved for that checkpoint. New retrieval work has NOT been committed or pushed; main is unchanged. Next: user tests the new search panel, then review/commit this slice when authorized, before proceeding to query rewrite and grounded answer generation.
+
 ## Current checkpoint — 31 October 2026
 
 Document upload/ingestion milestone accepted for the development checkpoint. User confirmed the final automatic status-update browser check passed. Earlier manual TXT/PDF/DOCX, validation, duplicate, download, department and private-sharing checks are recorded below.
@@ -251,3 +277,7 @@ Reviewed current `dev` working tree without application code changes or commits.
 Four focused probes reproduced stale-ACL revocation reversal, unbounded pre-auth multipart consumption, permanently stranded QUEUED/DISPATCHED jobs, and a concurrent cleanup/late-upsert vector leak. Static review also found both document/job UIs discard pagination cursors. These cases are not covered by the passing existing suite. Fix and regression-test them before the completion commit.
 
 Details, priorities, verification limits and next actions: [review-document-ingestion-2026-10-30.md](docs/review-document-ingestion-2026-10-30.md). The report and this tracker update remain uncommitted with the feature changes.
+
+## User acceptance and recovery observation — 1 November 2026
+
+User reports the retrieval manual checklist otherwise passed. E1 showed the intended busy/unavailable response with worker stopped. E2 remains pending: after restart, the second screenshot still shows Document search is temporarily unavailable. Logs distinguish a 118.59-second model cold load (versus 20-second query wait), Hugging Face DNS errors, and a later API PineconeConnectionError/503 despite subsequent worker embeddings taking about 0.04–0.05 seconds. Do not classify the later provider failure as just warm-up or mark recovery passed. No data-loss evidence was observed. Detailed operational limits and proposed readiness/offline-cache review actions are in docs/retrieval-known-limitations.md. No code, private configuration, document ACLs, commit or push changed in this observation.

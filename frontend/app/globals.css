@@ -20,3 +20,8 @@
 .document-share-panel legend { color: #a8b8ca; padding: 0 6px; }
 .share-target { display: flex; align-items: center; gap: 9px; color: #dce4ee; }
 .share-target input { accent-color: #5d8df0; }
+
+.document-search { margin-bottom: 24px; padding: 28px; }
+.document-search textarea { width: 100%; padding: 12px; border: 1px solid #334155; border-radius: 10px; background: #0d141e; color: #e7eef9; resize: vertical; font: inherit; }
+.search-passage { border-top: 1px solid #29374a; margin-top: 20px; padding-top: 20px; }
+.passage-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
