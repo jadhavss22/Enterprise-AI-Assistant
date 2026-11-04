@@ -1,5 +1,7 @@
 # Retrieval operational limits and recovery notes
 
+Update 2 November: startup/readiness/retry corrections are implemented and verified as recorded in [review fixes](retrieval-review-fixes-2026-11-02.md). E2 was subsequently confirmed by the user and a fresh controlled restart/live-search check. Cold CPU loading, external Pinecone connectivity, single-worker contention and current scope/rate/token bounds remain operational limits. The observations/proposals below are historical.
+
 Recorded 1 November 2026. These are observed behavior and current development limits, not production guarantees.
 
 ## Confirmed observations

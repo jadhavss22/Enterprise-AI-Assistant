@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "description": "Synthetic grounded-generation calibration: 20 supported and 10 insufficient-evidence cases. Separate from retrieval/security tests. Manual entailment review required.",
+  "cases": [
+    {
+      "id": "leave-1",
+      "question": "How many annual leave days does Cedar Demo provide?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "supported",
+      "review_terms": [
+        "18"
+      ]
+    },
+    {
+      "id": "leave-2",
+      "question": "According to the supplied policy, how many annual leave days does Cedar Demo provide?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "supported",
+      "review_terms": [
+        "18"
+      ]
+    },
+    {
+      "id": "support-1",
+      "question": "When is support available?",
+      "evidence": "Cedar Demo support operates Monday to Friday, 9 AM to 6 PM.",
+      "expected": "supported",
+      "review_terms": [
+        "Monday",
+        "Friday",
+        "9",
+        "6"
+      ]
+    },
+    {
+      "id": "support-2",
+      "question": "According to the supplied policy, when is support available?",
+      "evidence": "Cedar Demo support operates Monday to Friday, 9 AM to 6 PM.",
+      "expected": "supported",
+      "review_terms": [
+        "Monday",
+        "Friday",
+        "9",
+        "6"
+      ]
+    },
+    {
+      "id": "training-1",
+      "question": "What is the yearly training budget?",
+      "evidence": "Each Cedar Demo employee receives a yearly training budget of 12000 rupees.",
+      "expected": "supported",
+      "review_terms": [
+        "12000"
+      ]
+    },
+    {
+      "id": "training-2",
+      "question": "According to the supplied policy, what is the yearly training budget?",
+      "evidence": "Each Cedar Demo employee receives a yearly training budget of 12000 rupees.",
+      "expected": "supported",
+      "review_terms": [
+        "12000"
+      ]
+    },
+    {
+      "id": "remote-1",
+      "question": "How many remote work days are permitted each week?",
+      "evidence": "Cedar Demo permits two remote work days per week.",
+      "expected": "supported",
+      "review_terms": [
+        "two"
+      ]
+    },
+    {
+      "id": "remote-2",
+      "question": "According to the supplied policy, how many remote work days are permitted each week?",
+      "evidence": "Cedar Demo permits two remote work days per week.",
+      "expected": "supported",
+      "review_terms": [
+        "two"
+      ]
+    },
+    {
+      "id": "expenses-1",
+      "question": "What is the expense submission deadline?",
+      "evidence": "Expense claims must be submitted within 30 days.",
+      "expected": "supported",
+      "review_terms": [
+        "30"
+      ]
+    },
+    {
+      "id": "expenses-2",
+      "question": "According to the supplied policy, what is the expense submission deadline?",
+      "evidence": "Expense claims must be submitted within 30 days.",
+      "expected": "supported",
+      "review_terms": [
+        "30"
+      ]
+    },
+    {
+      "id": "onboarding-1",
+      "question": "When must new employees finish onboarding?",
+      "evidence": "New employees must complete onboarding within 10 working days.",
+      "expected": "supported",
+      "review_terms": [
+        "10"
+      ]
+    },
+    {
+      "id": "onboarding-2",
+      "question": "According to the supplied policy, when must new employees finish onboarding?",
+      "evidence": "New employees must complete onboarding within 10 working days.",
+      "expected": "supported",
+      "review_terms": [
+        "10"
+      ]
+    },
+    {
+      "id": "travel-1",
+      "question": "Who must approve domestic business travel?",
+      "evidence": "Domestic business travel requires prior manager approval.",
+      "expected": "supported",
+      "review_terms": [
+        "manager"
+      ]
+    },
+    {
+      "id": "travel-2",
+      "question": "According to the supplied policy, who must approve domestic business travel?",
+      "evidence": "Domestic business travel requires prior manager approval.",
+      "expected": "supported",
+      "review_terms": [
+        "manager"
+      ]
+    },
+    {
+      "id": "equipment-1",
+      "question": "How soon should lost equipment be reported?",
+      "evidence": "Lost equipment must be reported to IT within 24 hours.",
+      "expected": "supported",
+      "review_terms": [
+        "24"
+      ]
+    },
+    {
+      "id": "equipment-2",
+      "question": "According to the supplied policy, how soon should lost equipment be reported?",
+      "evidence": "Lost equipment must be reported to IT within 24 hours.",
+      "expected": "supported",
+      "review_terms": [
+        "24"
+      ]
+    },
+    {
+      "id": "probation-1",
+      "question": "How long is the standard probation period?",
+      "evidence": "The standard probation period is 90 days.",
+      "expected": "supported",
+      "review_terms": [
+        "90"
+      ]
+    },
+    {
+      "id": "probation-2",
+      "question": "According to the supplied policy, how long is the standard probation period?",
+      "evidence": "The standard probation period is 90 days.",
+      "expected": "supported",
+      "review_terms": [
+        "90"
+      ]
+    },
+    {
+      "id": "password-1",
+      "question": "When must a temporary password be changed?",
+      "evidence": "Temporary account passwords must be changed at the first login.",
+      "expected": "supported",
+      "review_terms": [
+        "first"
+      ]
+    },
+    {
+      "id": "password-2",
+      "question": "According to the supplied policy, when must a temporary password be changed?",
+      "evidence": "Temporary account passwords must be changed at the first login.",
+      "expected": "supported",
+      "review_terms": [
+        "first"
+      ]
+    },
+    {
+      "id": "insufficient-1",
+      "question": "What is the CEO salary?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-2",
+      "question": "How many sick leave days are offered?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-3",
+      "question": "What is the health insurance limit?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-4",
+      "question": "Which airline should I book?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-5",
+      "question": "What is the office address?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-6",
+      "question": "What is the contractor hourly rate?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-7",
+      "question": "How many parental leave days are offered?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-8",
+      "question": "What was last year revenue?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-9",
+      "question": "What is the retirement age?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    },
+    {
+      "id": "insufficient-10",
+      "question": "Which cloud region stores payroll?",
+      "evidence": "Cedar Demo provides 18 annual leave days per year.",
+      "expected": "abstain",
+      "review_terms": []
+    }
+  ]
+}

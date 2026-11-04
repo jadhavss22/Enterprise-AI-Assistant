@@ -20,14 +20,25 @@ def install_auth_errors(app):
             # Log only exception type and server-generated correlation ID, never payloads.
             logging.getLogger(__name__).error(
                 "Unhandled API error type=%s request_id=%s",
-                type(exc).__name__, request.state.request_id,
+                type(exc).__name__,
+                request.state.request_id,
             )
             response = error_response(
-                request, 500, "INTERNAL_ERROR", "The server could not complete this request"
+                request,
+                500,
+                "INTERNAL_ERROR",
+                "The server could not complete this request",
             )
         response.headers["X-Request-ID"] = request.state.request_id
         if request.url.path.startswith(
-            ("/api/v1/auth", "/api/v1/users", "/api/v1/admin", "/api/v1/documents", "/api/v1/ingestion-jobs")
+            (
+                "/api/v1/auth",
+                "/api/v1/users",
+                "/api/v1/admin",
+                "/api/v1/documents",
+                "/api/v1/ingestion-jobs",
+                "/api/v1/conversations",
+            )
         ):
             response.headers["Cache-Control"] = "no-store"
             response.headers["Pragma"] = "no-cache"

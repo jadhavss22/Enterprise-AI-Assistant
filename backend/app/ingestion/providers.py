@@ -74,20 +74,29 @@ def _load_local_model():
             if _local_model is None:
                 from sentence_transformers import SentenceTransformer
 
-                _local_model = SentenceTransformer(
-                    settings.local_embedding_model,
-                    device="cpu",
-                )
+                try:
+                    model = SentenceTransformer(
+                        settings.local_embedding_model,
+                        device="cpu",
+                        local_files_only=settings.local_embedding_cache_only,
+                    )
+                except OSError:
+                    if settings.local_embedding_cache_only:
+                        raise ProviderConfigurationError(
+                            "MODEL_CACHE_UNAVAILABLE"
+                        ) from None
+                    raise
                 dimension_reader = getattr(
-                    _local_model,
+                    model,
                     "get_embedding_dimension",
-                    _local_model.get_sentence_embedding_dimension,
+                    model.get_sentence_embedding_dimension,
                 )
                 actual_dimension = dimension_reader()
                 if actual_dimension != settings.local_embedding_dimensions:
                     raise ProviderConfigurationError(
                         "LOCAL_EMBEDDING_DIMENSION_MISMATCH"
                     )
+                _local_model = model
     return _local_model
 
 

@@ -64,7 +64,7 @@ def test_worker_rejects_tokens_without_silent_truncation(monkeypatch):
         def embed(self, texts):
             return [[0.1, 0.2]]
 
-    monkeypatch.setattr(tasks, "embedding_provider", Provider)
+    monkeypatch.setattr(tasks, "ready_provider", Provider)
     assert tasks.embed_query.run("one two three four") == {"error": "QUERY_TOO_LONG"}
     assert tasks.embed_query.run("one two")["vector"] == [0.1, 0.2]
 
@@ -273,9 +273,13 @@ async def test_worker_bridge_redacts_and_cleans_results(monkeypatch):
         assert kwargs["argsrepr"] == "[<redacted query>]"
         return Result()
 
+    async def ready():
+        return None
+
+    monkeypatch.setattr(providers, "require_model_ready", ready)
     monkeypatch.setattr(providers.embed_query, "apply_async", publish)
     assert len(await providers.query_embedding("synthetic question")) == 384
-    assert calls == ["revoke", "forget"]
+    assert calls == ["forget"]
     monkeypatch.setattr(Result, "get", lambda *a, **k: {"error": "QUERY_TOO_LONG"})
     with pytest.raises(HTTPException) as error:
         await providers.query_embedding("long question")

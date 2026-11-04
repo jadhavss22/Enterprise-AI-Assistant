@@ -55,6 +55,7 @@ services:
     environment:
       HF_HOME: /var/cache/huggingface
       HF_HUB_DISABLE_XET: "1"
+      HF_HUB_OFFLINE: ${LOCAL_EMBEDDING_CACHE_ONLY:-true}
     depends_on:
       api:
         condition: service_healthy

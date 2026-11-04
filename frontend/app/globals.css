@@ -25,3 +25,17 @@
 .document-search textarea { width: 100%; padding: 12px; border: 1px solid #334155; border-radius: 10px; background: #0d141e; color: #e7eef9; resize: vertical; font: inherit; }
 .search-passage { border-top: 1px solid #29374a; margin-top: 20px; padding-top: 20px; }
 .passage-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.65; }
+
+.chat-layout { display: grid; grid-template-columns: minmax(180px, 260px) minmax(0, 1fr); gap: 20px; padding: 28px; }
+.chat-list, .chat-main { padding: 22px; min-width: 0; }
+.chat-list { display: flex; flex-direction: column; gap: 12px; align-self: start; }
+.chat-list button, .chat-list a { overflow-wrap: anywhere; text-align: left; }
+.chat-list .selected { border-color: #77a6ff; }
+.chat-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; padding-bottom: 20px; }
+.chat-toolbar label { display: grid; gap: 8px; }
+.chat-toolbar input, .chat-main textarea { background: #0d141e; color: #e7eef9; border: 1px solid #334155; border-radius: 8px; padding: 12px; font: inherit; }
+.chat-main textarea { width: 100%; resize: vertical; }
+.chat-turn { padding: 20px 0; border-top: 1px solid #29374a; }
+.chat-turn h2 { font-size: 1rem; }
+.chat-main form { margin-top: 20px; }
+@media(max-width: 950px) { .chat-layout { grid-template-columns: 1fr; padding: 16px; } }

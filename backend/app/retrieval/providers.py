@@ -8,31 +8,53 @@ from pinecone import Pinecone
 
 from app.config import settings
 from app.documents.validation import fail
+from app.retrieval.pool import blocking_call
+from app.retrieval.readiness import require_model_ready
 from app.retrieval.tasks import embed_query
 
 logger = logging.getLogger(__name__)
 
 
 async def query_embedding(query):
+    await require_model_ready()
     result = None
+    completed = False
     try:
-        result = await asyncio.to_thread(
+        result = await blocking_call(
             embed_query.apply_async,
             args=[query],
             argsrepr="[<redacted query>]",
             expires=settings.retrieval_embedding_timeout_seconds,
+            retry=False,
         )
-        payload = await asyncio.to_thread(
+        payload = await blocking_call(
             result.get,
             timeout=settings.retrieval_embedding_timeout_seconds,
             propagate=False,
         )
+        completed = True
         if isinstance(payload, dict) and payload.get("error") == "QUERY_TOO_LONG":
             raise fail(
                 422,
                 "QUERY_TOO_LONG",
                 "Shorten the question to fit the embedding model input limit",
             )
+        if isinstance(payload, dict) and payload.get("error") in {
+            "MODEL_WARMING",
+            "MODEL_CACHE_UNAVAILABLE",
+            "MODEL_INIT_FAILED",
+        }:
+            code = payload["error"]
+            exc = fail(
+                503,
+                code,
+                "The search model is warming up; check availability shortly"
+                if code == "MODEL_WARMING"
+                else "Search model initialization failed; contact your administrator",
+            )
+            if code == "MODEL_WARMING":
+                exc.headers = {"Retry-After": "3"}
+            raise exc
         if not isinstance(payload, dict) or payload.get("error"):
             raise fail(
                 503,
@@ -57,10 +79,11 @@ async def query_embedding(query):
             )
         return vector
     except CeleryTimeout:
+        await require_model_ready()
         raise fail(
             503,
             "SEARCH_BUSY",
-            "The embedding worker is busy or warming up; retry shortly",
+            "The embedding worker is busy; retry shortly",
         ) from None
     except (OSError, ConnectionError):
         raise fail(
@@ -72,8 +95,9 @@ async def query_embedding(query):
         if result is not None:
             # A running task may finish later; the short result TTL bounds retention.
             try:
-                await asyncio.to_thread(result.revoke, terminate=False)
-                await asyncio.to_thread(result.forget)
+                if not completed:
+                    await blocking_call(result.revoke, terminate=False)
+                await blocking_call(result.forget)
             except Exception:  # noqa: BLE001 - best-effort ephemeral result cleanup
                 logger.warning("retrieval.result_cleanup_failed")
 
@@ -110,12 +134,12 @@ async def search_namespaces(documents, vector):
 
 async def _search_namespaces(documents, vector):
     # Each admitted search has a bounded fan-out; service admission bounds total work.
-    index = await asyncio.to_thread(retrieval_index)
+    index = await blocking_call(retrieval_index)
     budget = asyncio.Semaphore(settings.retrieval_search_concurrency)
 
     async def one(doc):
         async with budget:
-            response = await asyncio.to_thread(_query_namespace, index, doc, vector)
+            response = await blocking_call(_query_namespace, index, doc, vector)
             matches = (
                 response.get("matches", [])
                 if isinstance(response, dict)

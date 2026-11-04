@@ -18,20 +18,26 @@ class UploadBodyLimitMiddleware:
         app,
         max_body_bytes=MAX_UPLOAD_BODY_BYTES,
         path="/api/v1/documents",
+        path_prefix=False,
         error_code="FILE_TOO_LARGE",
         error_message="Files must be 20 MB or smaller",
     ):
         self.app = app
         self.max_body_bytes = max_body_bytes
         self.path = path
+        self.path_prefix = path_prefix
         self.error_code = error_code
         self.error_message = error_message
 
     async def __call__(self, scope, receive, send):
         if (
             scope["type"] != "http"
-            or scope["method"] != "POST"
-            or scope["path"].rstrip("/") != self.path
+            or scope["method"]
+            not in ({"POST", "PATCH"} if self.path_prefix else {"POST"})
+            or not (
+                scope["path"].rstrip("/") == self.path
+                or (self.path_prefix and scope["path"].startswith(self.path + "/"))
+            )
         ):
             return await self.app(scope, receive, send)
 

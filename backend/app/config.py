@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     embedding_provider: Literal["local", "azure_openai"] = "local"
     local_embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
     local_embedding_dimensions: int = Field(default=384, ge=1, le=4096)
+    local_embedding_cache_only: bool = True
     local_embedding_batch_size: int = Field(default=8, ge=1, le=64)
     pinecone_index_name: str | None = None
     document_chunk_size: int = Field(default=200, ge=1, le=2000)
@@ -37,6 +38,7 @@ class Settings(BaseSettings):
     retrieval_embedding_timeout_seconds: int = Field(default=20, ge=1, le=30)
     retrieval_namespace_timeout_seconds: int = Field(default=8, ge=1, le=15)
     retrieval_search_timeout_seconds: int = Field(default=20, ge=1, le=30)
+    retrieval_readiness_timeout_seconds: int = Field(default=8, ge=1, le=15)
     retrieval_rate_limit: int = Field(default=10, ge=1, le=120)
     health_check_timeout_seconds: float = 2.0
     frontend_origin: str = "http://localhost:3000"
@@ -66,6 +68,14 @@ class Settings(BaseSettings):
     admin_transaction_timeout_seconds: int = Field(default=15, ge=1, le=60)
     pinecone_api_key: str | None = None
     openai_api_key: str | None = None
+    chat_rate_limit: int = Field(default=6, ge=1, le=30)
+    chat_provider: Literal["gemini"] = "gemini"
+    gemini_api_key: str | None = Field(default=None, repr=False)
+    gemini_chat_model: str = "gemini-3.6-flash"
+    chat_first_token_timeout_seconds: float = Field(default=30, gt=0, le=60)
+    chat_timeout_seconds: float = Field(default=90, gt=0, le=120)
+    chat_max_completion_tokens: int = Field(default=2048, ge=128, le=4096)
+    chat_max_output_characters: int = Field(default=16000, ge=256, le=32000)
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

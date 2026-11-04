@@ -2,12 +2,14 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
+import { consumeChatStream, type ChatEvent } from "./chat-stream";
+
 export type Role = "employee" | "manager" | "admin";
 export type User = { user_id: string; email: string; display_name: string; role: Role; status: "active" | "disabled"; department_id: string };
 type AuthPayload = { access_token: string; token_type: "bearer"; expires_in: number; user: User; csrf_token: string; session_expires_at: string };
 export type AuthStatus = "loading" | "authenticated" | "anonymous" | "unavailable";
 export type ApiError = Error & { status: number; code: string; requestId?: string; retryAfter?: string };
-type ContextValue = { user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; download: (path: string, filename: string) => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
+type ContextValue = { streamChat: (path: string, body: string, signal: AbortSignal, onEvent: (event: ChatEvent) => void) => Promise<void>; user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; download: (path: string, filename: string) => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
 
 const Context = createContext<ContextValue | undefined>(undefined);
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
@@ -164,6 +166,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [refresh, user]);
 
+
+  const streamChat = useCallback(async (path: string, body: string, signal: AbortSignal, onEvent: (event: ChatEvent) => void) => {
+    if (!tokenRef.current || !user) throw new Error("Sign in to continue.");
+    const identity = `${user.user_id}:${user.department_id}:${user.role}`;
+    const stillSame = () => `${userRef.current?.user_id}:${userRef.current?.department_id}:${userRef.current?.role}` === identity;
+    if (expiresAtRef.current - Date.now() < 190000) await refresh();
+    if (!tokenRef.current || !stillSame()) throw new Error("Your session changed. Please retry.");
+    const url = new URL(path.replace(/^\//, ""), API_BASE.replace(/\/$/, "") + "/");
+    if (url.origin !== new URL(API_BASE).origin || !/^\/conversations\/[a-f0-9]{24}\/messages\/stream$/.test(path)) throw new Error("Invalid chat API path.");
+    const send = () => fetch(url, { method: "POST", body, signal, credentials: "include", cache: "no-store", headers: { "Content-Type": "application/json", Authorization: `Bearer ${tokenRef.current}` } });
+    let response = await send();
+    // Only retry an HTTP 401 before consuming any stream. The request ID stays stable.
+    if (response.status === 401) {
+      await response.body?.cancel();
+      await refresh();
+      if (!tokenRef.current || !stillSame()) throw new Error("Your session changed. Please retry.");
+      response = await send();
+    }
+    if (!response.ok) {
+      let payload: unknown;
+      try { payload = await response.json(); } catch { payload = undefined; }
+      throw apiError(response, payload);
+    }
+    await consumeChatStream(response, event => {
+      if (!stillSame() || signal.aborted) throw new Error("Your session changed or the request was cancelled.");
+      onEvent(event);
+    });
+  }, [refresh, user]);
+
   const download = useCallback(async (path: string, filename: string) => {
     if (!tokenRef.current || !user) throw new Error("Sign in to continue.");
     const identity = user.user_id;
@@ -267,7 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
   }, [revalidate, status]);
 
-  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, download, api }), [api, download, login, logout, logoutAll, message, refresh, status, user]);
+  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, download, api, streamChat }), [api, download, login, logout, logoutAll, message, refresh, status, user, streamChat]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

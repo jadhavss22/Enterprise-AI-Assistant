@@ -12,6 +12,8 @@ from app.auth.routes import router as auth_router
 from app.auth.routes import users_router
 from app.auth.security import validate_security_settings
 from app.auth.storage import ensure_auth_storage
+from app.chat.routes import router as chat_router
+from app.chat.storage import ensure_chat_storage
 from app.config import settings
 from app.documents.body_limit import UploadBodyLimitMiddleware
 from app.documents.routes import router as documents_router
@@ -47,6 +49,7 @@ async def lifespan(application: FastAPI):
             )
         await ensure_auth_storage(application.state.db)
         await ensure_document_storage(application.state.db)
+        await ensure_chat_storage(application.state.db)
         yield
     finally:
         mongo_client.close()
@@ -62,6 +65,14 @@ app.add_middleware(
     max_body_bytes=16384,
     error_code="QUERY_BODY_TOO_LARGE",
     error_message="Search request is too large",
+)
+app.add_middleware(
+    UploadBodyLimitMiddleware,
+    path="/api/v1/conversations",
+    path_prefix=True,
+    max_body_bytes=16384,
+    error_code="CHAT_BODY_TOO_LARGE",
+    error_message="Chat request is too large",
 )
 # CORS must wrap the request/error middleware so failures reach browser clients.
 app.add_middleware(
@@ -83,6 +94,7 @@ app.include_router(users_router)
 app.include_router(admin_users_router)
 app.include_router(documents_router)
 app.include_router(retrieval_router)
+app.include_router(chat_router)
 
 
 @app.get("/health/live", tags=["health"])

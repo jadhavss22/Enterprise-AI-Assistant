@@ -386,9 +386,20 @@ def process_ingestion_job(self, job_id: str):
         )
         if not chunks:
             raise RuntimeError("DOCUMENT_TEXT_EMPTY")
-        db.documents.update_one(
-            {"_id": document["_id"], "deleted_at": {"$exists": False}},
-            {"$set": {"chunk_count": len(chunks), "updated_at": datetime.now(UTC)}},
+        # The document count belongs to active_index_version. Pending attempts
+        # must never alter its bounds; activation publishes version/count together.
+        db.ingestion_jobs.update_one(
+            {
+                "_id": job["_id"],
+                "status": "PROCESSING",
+                "fencing_token": job["fencing_token"],
+            },
+            {
+                "$set": {
+                    "pending_chunk_count": len(chunks),
+                    "updated_at": datetime.now(UTC),
+                }
+            },
         )
         _stage(db, job, IngestionStage.EMBEDDING)
         embeddings = _embed_chunks(db, job, chunks, provider)

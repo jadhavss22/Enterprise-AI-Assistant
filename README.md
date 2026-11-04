@@ -263,3 +263,34 @@ Sign in and open Documents, then use **Search documents** to ask a short questio
 The initial search bound is 25 authorized active document versions, four concurrent namespace calls per search, 20 merged candidates and up to five passages. The provisional cosine cutoff is 0.25, calibrated only on the invented fixture dataset. More than the supported document bound returns an explicit scope-limit error, not partial results. Settings are documented in `.env.example`; preserve the existing embedding model/index pairing.
 
 See [retrieval plan and verification](docs/retrieval-plan.md) and [calibration results](evaluation/retrieval-baseline-v1-results.json). Optional live fixture evaluation inside the API container: `python -m scripts.retrieval_live_check --dataset /path/to/retrieval-baseline-v1.json`. It requires the three synthetic fixtures to exist, real Pinecone credentials configured privately, and a running worker; it creates disposable auth state and reads vectors without upserting them.
+
+## Retrieval startup, availability and recovery
+
+The worker now warms and validates its model in the Celery execution child. Documents shows a separate search-availability state; questions are not submitted while the model is warming or services are known unavailable. Core API health remains separate so model warm-up does not incorrectly disable login or document listing.
+
+Cached-only local loading is the default (`LOCAL_EMBEDDING_CACHE_ONLY=true`). For a fresh machine/cache, explicitly provision the public model once, then restart the worker:
+
+```powershell
+docker compose exec -e HF_HUB_OFFLINE=0 -e LOCAL_EMBEDDING_CACHE_ONLY=false worker python -m scripts.provision_embedding_model
+docker compose restart worker
+```
+
+The readiness resource is `GET /api/v1/retrieval/readiness` (authenticated; inspect its status field). A missing model cache is an initialization/configuration failure; a Pinecone outage is vector-service unavailability. Error codes, request IDs and retry countdowns are shown in the UI. No automatic query replay is performed after recovery. Cold CPU loading still takes time, and Pinecone connectivity is required for search.
+
+Review resolutions and exact test limits: [retrieval review fixes](docs/retrieval-review-fixes-2026-11-02.md).
+
+## AI Chat development
+
+Gemini Developer API supplies generation; local MiniLM/Pinecone remain retrieval providers.
+Set GEMINI_API_KEY privately in ignored .env and GEMINI_CHAT_MODEL=gemini-3.6-flash.
+Restart/recreate the API after environment changes. No key belongs in NEXT_PUBLIC variables.
+Use synthetic documents on the development free tier; quotas are finite.
+
+Open http://localhost:3000/chat after services are ready. Create a conversation,
+ask a short document question, and wait for final source references. Streamed
+text is provisional. Stop, quota failures and disconnects do not mark partial
+answers complete. Saved answers are hidden when their source access/version changes.
+Use /history to reopen chats; rename/delete controls belong to the conversation owner.
+
+Contracts, verification limits, quality status and commands:
+[AI Chat implementation](docs/ai-chat-implementation-2026-11-03.md).

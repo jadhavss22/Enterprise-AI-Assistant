@@ -1,5 +1,7 @@
 # Permission-aware retrieval code review
 
+Historical review. R1-R5 are addressed by the 2 November working-tree fixes; see [resolution and verification](retrieval-review-fixes-2026-11-02.md). The original findings below describe the reviewed baseline, not the corrected implementation.
+
 Reviewed 1 November 2026 on `dev`, against baseline `8716964` and the current uncommitted retrieval slice. Application code was not changed. No commit, push, live provider call, service restart or private configuration change was made by this review.
 
 ## Findings

@@ -201,3 +201,14 @@ https://motor.readthedocs.io/en/stable/api-asyncio/asyncio_motor_client_session.
 ## Step D frontend integration — implementation complete; signed-in acceptance pending
 
 The browser now integrates memory-only access tokens, the backend-issued CSRF token, HttpOnly refresh-cookie restoration and rotation, cross-tab refresh locking, session logout/logout-all, user revalidation, guarded routes, role-aware navigation, profile/session settings, and Admin account create/list/filter/update forms. See [Step D](docs/authentication-step-d.md). Lint, typecheck, production build, API health, unauthenticated route smoke, and signed-out Admin-route redirect checks passed. End-to-end sign-in and Admin write verification await a real development Admin account created interactively by the operator. No uploads or RAG were implemented.
+
+## AI Chat — 3 November 2026
+
+Gemini 3.6 Flash is the tested development default after 3.8 Flash returned 503.
+Conversation/RAG streaming backend and chat/history UI are implemented on dev.
+Full deterministic backend and rendered browser checks passed. Live initial and
+follow-up RAG smoke passed with disposable test state. The 30-case synthetic
+generation calibration completed on 4 November: 20/20 supported answers and 10/10
+required abstentions passed manual review without relaxing production timeouts.
+See docs/ai-chat-implementation-2026-11-03.md and PROJECT_STATUS.md. Code review is
+next; no commit/push.

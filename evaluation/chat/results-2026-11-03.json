@@ -1,0 +1,308 @@
+{
+  "dataset_version": 1,
+  "results": [
+    {
+      "id": "leave-1",
+      "expected": "supported",
+      "answer": "Cedar Demo provides 18 annual leave days per year [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "leave-2",
+      "expected": "supported",
+      "answer": "According to the policy, Cedar Demo provides 18 annual leave days per year [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "support-1",
+      "expected": "supported",
+      "answer": "Support is available Monday to Friday, from 9 AM to 6 PM [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "support-2",
+      "expected": "supported",
+      "answer": "According to the policy, support is available Monday to Friday, from 9 AM to 6 PM [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "training-1",
+      "expected": "supported",
+      "answer": "Each Cedar Demo employee receives a yearly training budget of 12000 rupees [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "training-2",
+      "expected": "supported",
+      "answer": "According to the supplied policy, the yearly training budget is 12000 rupees per employee [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "remote-1",
+      "expected": "supported",
+      "answer": "Cedar Demo permits two remote work days per week [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "remote-2",
+      "expected": "supported",
+      "answer": "According to the policy, two remote work days are permitted each week [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "expenses-1",
+      "expected": "supported",
+      "answer": "Expense claims must be submitted within 30 days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "expenses-2",
+      "expected": "supported",
+      "answer": "According to the supplied policy, expense claims must be submitted within 30 days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "onboarding-1",
+      "expected": "supported",
+      "answer": "New employees must complete onboarding within 10 working days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "onboarding-2",
+      "expected": "supported",
+      "answer": "New employees must complete onboarding within 10 working days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "travel-1",
+      "expected": "supported",
+      "answer": "Domestic business travel requires prior manager approval [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "travel-2",
+      "expected": "supported",
+      "answer": "According to the supplied policy, domestic business travel requires approval from a manager [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "equipment-1",
+      "expected": "supported",
+      "answer": "Lost equipment must be reported to IT within 24 hours [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "equipment-2",
+      "expected": "supported",
+      "answer": "According to the supplied policy, lost equipment must be reported within 24 hours [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "probation-1",
+      "expected": "supported",
+      "answer": "The standard probation period is 90 days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "probation-2",
+      "expected": "supported",
+      "answer": "According to the supplied policy, the standard probation period is 90 days [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "password-1",
+      "expected": "supported",
+      "answer": "A temporary password must be changed at the first login [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "password-2",
+      "expected": "supported",
+      "answer": "According to the policy, a temporary password must be changed at the first login [S1].",
+      "reference_integrity": true,
+      "citation_count": 1,
+      "abstained": false,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-1",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-2",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-3",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-4",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-5",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-6",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-7",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-8",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-9",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    },
+    {
+      "id": "insufficient-10",
+      "expected": "abstain",
+      "answer": "I could not find enough information in the documents you can access to answer this question.",
+      "reference_integrity": true,
+      "citation_count": 0,
+      "abstained": true,
+      "review_terms_present": true,
+      "manual_claim_support_review": "PASS"
+    }
+  ],
+  "acceptance": "PASS",
+  "completed_cases": 30,
+  "total_cases": 30
+}

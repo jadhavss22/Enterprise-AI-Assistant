@@ -177,7 +177,7 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
         {!uploadOnly && canUpload && <Link className="button primary" href="/manager/upload">Upload document</Link>}
       </div>
 
-      {!uploadOnly && <DocumentSearch />}
+      {!uploadOnly && <DocumentSearch key={`${user?.user_id}:${user?.department_id}:${user?.role}`} />}
 
       {canUpload && <section className="panel document-upload">
         <div><h2>{uploadOnly ? "New upload" : "Add a document"}</h2><p className="muted-note">PDF, DOCX, or TXT · Maximum 20 MB</p></div>

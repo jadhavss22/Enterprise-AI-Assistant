@@ -28,6 +28,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright')
     if (url.pathname.endsWith('/auth/csrf')) data = { csrf_token: payload.csrf_token };
     else if (url.pathname.endsWith('/auth/refresh')) data = payload;
     else if (url.pathname.endsWith('/users/me')) data = user;
+    else if (url.pathname.endsWith('/retrieval/readiness')) data = { status: 'ready', model: 'ready', vectors: 'ready', code: null, retry_after: 0 };
     else if (url.pathname.endsWith('/documents')) {
       const offset = Number(url.searchParams.get('cursor') || 0);
       data = { documents: docs.slice(offset, offset + 50), next_cursor: offset + 50 < docs.length ? String(offset + 50) : null };
