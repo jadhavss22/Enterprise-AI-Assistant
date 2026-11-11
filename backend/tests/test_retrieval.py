@@ -2,13 +2,14 @@
 
 import hashlib
 from datetime import UTC, datetime
+from functools import partial
 
 import pytest
 from bson import ObjectId
 from test_admin_users import bearer, create, env, login  # noqa: F401
 
 from app.config import settings
-from app.retrieval import providers, service, tasks
+from app.retrieval import providers, routes, service, tasks
 from app.retrieval.schemas import SearchRequest
 
 
@@ -179,6 +180,37 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
         {"_id": private["_id"]}, {"$set": {"allowed_user_ids": [employee_id]}}
     )
     assert len((await request()).json()["passages"]) == 2
+
+    # Exercise the opt-in path, then revoke access while the callback is running.
+    async def broad_search(docs, vector):
+        return [(doc, match(doc, score=0.22)) for doc in docs], 1
+
+    async def rerank(query, candidates, filenames):
+        assert set(filenames) == {str(allowed["_id"]), str(private["_id"])}
+        await db.documents.update_one(
+            {"_id": private["_id"]}, {"$set": {"allowed_user_ids": []}}
+        )
+        await db.documents.update_one(
+            {"_id": allowed["_id"]}, {"$set": {"active_index_version": 2}}
+        )
+        return candidates
+
+    with monkeypatch.context() as experiment:
+        experiment.setattr(settings, "retrieval_min_score", 0.25)
+        experiment.setattr(service, "search_namespaces", broad_search)
+        assert (await request()).json()["status"] == "NO_RELEVANT_MATCHES"
+        experiment.setattr(settings, "retrieval_min_score", 0.20)
+        experiment.setattr(routes, "retrieve", partial(service.retrieve, rerank=rerank))
+        response = await request()
+        assert response.status_code == 200
+        assert response.json()["passages"] == []
+
+    await db.documents.update_one(
+        {"_id": allowed["_id"]}, {"$set": {"active_index_version": 1}}
+    )
+    await db.documents.update_one(
+        {"_id": private["_id"]}, {"$set": {"allowed_user_ids": [employee_id]}}
+    )
 
     async def revoke(docs, vector):
         await db.documents.update_one(

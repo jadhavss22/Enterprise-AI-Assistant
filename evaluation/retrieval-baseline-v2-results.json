@@ -1,0 +1,233 @@
+{
+  "baseline": {
+    "dataset_version": 2,
+    "cutoff": 0.25,
+    "mean_recall_at_5": 0.8888888888888888,
+    "cases": [
+      {
+        "id": "leave-allowance",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.3333333333333333,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "leave-approval",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "helpdesk-hours",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "support-hours",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "training-budget",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "training-currency",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "unrelated-astronomy",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "unrelated-cooking",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "exact-support-policy",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "exact-training-policy",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "paraphrased-time-off",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "unavailable-travel-policy",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      }
+    ]
+  },
+  "comparison": {
+    "dataset_version": 2,
+    "cutoff": 0.2,
+    "mean_recall_at_5": 1,
+    "cases": [
+      {
+        "id": "leave-allowance",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.3333333333333333,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "leave-approval",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "helpdesk-hours",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "support-hours",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "training-budget",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "training-currency",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "unrelated-astronomy",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "unrelated-cooking",
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "exact-support-policy",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "exact-training-policy",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.3333333333333333,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "paraphrased-time-off",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "unavailable-travel-policy",
+        "http": 200,
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      }
+    ]
+  },
+  "notes": "Live synthetic fixtures only. The final two baseline requests initially returned 429 and were rerun in a new disposable evaluation batch. The comparison changed the cutoff and rate limit only in the evaluation process."
+}

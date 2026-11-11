@@ -1,3 +1,19 @@
+## Retrieval experiment review checkpoint
+
+Reviewed the opt-in reranking and fallback paths. The default search and chat calls omit the reranker. The new gating regression verifies that a candidate at the 0.25 baseline cutoff bypasses the model and that a broader candidate can be scored when there are no baseline candidates. The authenticated integration regression verifies that the default path rejects a 0.22 candidate and that a private share revocation and an index version change during reranking prevent either candidate from being returned.
+
+Fresh verification: all 15 retrieval tests passed using local MongoDB and Redis. Backend Ruff and git diff checks passed. The prior 40-request live evaluation remains the quality evidence for the fallback, which matched baseline outcomes on all 20 questions. The vacation sign-off miss remains open. Keep the fallback experimental.
+
+## Retrieval reranking fallback experiment
+
+Added an opt-in fallback that preserves candidates at the 0.25 baseline cutoff and scores 0.20 candidates when there are no baseline candidates. Tested a minimum reranker logit of -4 on the original 12 cases and eight additional labeled questions against the same three synthetic documents. All 40 requests returned HTTP 200. Neither variant changed the other variant's result status or count. Both found all expected sources for 8/9 original and 2/4 new supported questions. Both returned no matches for 3/3 original and 1/4 new unsupported questions. Training reimbursement was preserved and vacation sign-off was still missed. The related unsupported cases that already matched the baseline bypassed the fallback. Targeted Ruff and git diff checks passed. The fallback remains evaluation-only. See evaluation/retrieval-fallback-v3-results.json.
+
+## Retrieval reranking experiment
+
+Added an opt-in live evaluation runner using the pinned MS MARCO MiniLM cross-encoder on CPU. It compares the 0.25 semantic baseline with 0.20 candidate retrieval and a minimum reranker logit of 0. The normal retrieval path continues to use its configured cutoff. The experiment applies reranking to validated candidates, before the existing final authorization and version checks.
+
+All 24 live requests succeeded. The baseline found expected sources on 8/9 supported cases and returned no matches on 3/3 unsupported cases. The reranker found expected sources on 7/9 supported cases and returned no matches on 3/3 unsupported cases. It rejected the airfare false positive from the earlier broad-only run but also filtered out training reimbursement and vacation sign-off. Do not enable this configuration based on these results. A follow-up can preserve the existing high-confidence results and validate a rescue threshold for broader candidates on additional labeled examples. See evaluation/retrieval-rerank-v2-results.json for per-case outcomes and timings. Fourteen retrieval regression tests and targeted Ruff/diff checks passed.
+
 ## Dashboard checkpoint and retrieval baseline - 11 November 2026
 
 Reviewed the dashboard, feedback, and Compose startup change on dev. The updated container reached Next.js Ready and the dashboard route returned HTTP 200. Prior rendered browser verification with synthetic data covered chart/table toggles, activity windows, refresh, mobile layout and API failure. The user confirmed live Admin acceptance on 11 November and previously confirmed feedback browser acceptance. The user authorized committing and pushing the dashboard, feedback, and Compose startup checkpoint to dev.

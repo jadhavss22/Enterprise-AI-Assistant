@@ -95,7 +95,7 @@ def checked_candidate(doc, match):
     }
 
 
-async def retrieve(db, actor, query, request_id):
+async def retrieve(db, actor, query, request_id, *, rerank=None):
     # Refuse queued API work rather than accumulating unlimited namespace searches.
     try:
         await asyncio.wait_for(_search_slots.acquire(), timeout=0.1)
@@ -103,12 +103,12 @@ async def retrieve(db, actor, query, request_id):
         raise fail(503, "SEARCH_BUSY", "Search is busy; retry shortly") from None
     started = time.monotonic()
     try:
-        return await _retrieve(db, actor, query, request_id, started)
+        return await _retrieve(db, actor, query, request_id, started, rerank=rerank)
     finally:
         _search_slots.release()
 
 
-async def _retrieve(db, actor, query, request_id, started):
+async def _retrieve(db, actor, query, request_id, started, *, rerank=None):
     documents = (
         await db.documents.find(searchable_query(actor))
         .limit(settings.retrieval_max_documents + 1)
@@ -152,6 +152,9 @@ async def _retrieve(db, actor, query, request_id, started):
             candidates.append(candidate)
     candidates.sort(key=lambda c: (-c["score"], c["chunk_id"]))
     candidates = candidates[: settings.retrieval_candidate_limit]
+    if rerank is not None and candidates:
+        filenames = {str(doc["_id"]): doc["filename"] for doc in documents}
+        candidates = await rerank(query, candidates, filenames)
     current = await revalidate_actor(db, actor)
     latest_query = searchable_query(current)
     latest_query["_id"] = {"$in": [d["_id"] for d in documents]}

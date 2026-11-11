@@ -1,0 +1,458 @@
+{
+  "model": "cross-encoder/ms-marco-MiniLM-L6-v2",
+  "minimum_logit": -4,
+  "baseline": {
+    "dataset_version": 3,
+    "cutoff": 0.25,
+    "mean_recall_at_5": 0.7692307692307693,
+    "cases": [
+      {
+        "id": "leave-allowance",
+        "http": 200,
+        "latency_ms": 6620,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.3333333333333333,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "leave-approval",
+        "http": 200,
+        "latency_ms": 3800,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "helpdesk-hours",
+        "http": 200,
+        "latency_ms": 3371,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "support-hours",
+        "http": 200,
+        "latency_ms": 2419,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "training-budget",
+        "http": 200,
+        "latency_ms": 1783,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "training-currency",
+        "http": 200,
+        "latency_ms": 2886,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "unrelated-astronomy",
+        "http": 200,
+        "latency_ms": 2169,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "unrelated-cooking",
+        "http": 200,
+        "latency_ms": 3588,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "exact-support-policy",
+        "http": 200,
+        "latency_ms": 4487,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "exact-training-policy",
+        "http": 200,
+        "latency_ms": 2185,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "paraphrased-time-off",
+        "http": 200,
+        "latency_ms": 2227,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "unavailable-travel-policy",
+        "http": 200,
+        "latency_ms": 2243,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-leave-balance",
+        "http": 200,
+        "latency_ms": 2765,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-leave-supervisor",
+        "http": 200,
+        "latency_ms": 2712,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-support-schedule",
+        "http": 200,
+        "latency_ms": 3941,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "holdout-training-cap",
+        "http": 200,
+        "latency_ms": 2069,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-laptop",
+        "http": 200,
+        "latency_ms": 2320,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-carryover",
+        "http": 200,
+        "latency_ms": 2642,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-training-deadline",
+        "http": 200,
+        "latency_ms": 2082,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-vpn",
+        "http": 200,
+        "latency_ms": 2282,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      }
+    ]
+  },
+  "fallback": {
+    "dataset_version": 3,
+    "cutoff": 0.2,
+    "mean_recall_at_5": 0.7692307692307693,
+    "cases": [
+      {
+        "id": "leave-allowance",
+        "http": 200,
+        "latency_ms": 2375,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.3333333333333333,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "leave-approval",
+        "http": 200,
+        "latency_ms": 4380,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "helpdesk-hours",
+        "http": 200,
+        "latency_ms": 2476,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.5,
+        "negative_empty": null,
+        "result_count": 2
+      },
+      {
+        "id": "support-hours",
+        "http": 200,
+        "latency_ms": 2396,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "training-budget",
+        "http": 200,
+        "latency_ms": 1878,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "training-currency",
+        "http": 200,
+        "latency_ms": 4128,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "unrelated-astronomy",
+        "http": 200,
+        "latency_ms": 2211,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "unrelated-cooking",
+        "http": 200,
+        "latency_ms": 1758,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "exact-support-policy",
+        "http": 200,
+        "latency_ms": 2450,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "exact-training-policy",
+        "http": 200,
+        "latency_ms": 2344,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "paraphrased-time-off",
+        "http": 200,
+        "latency_ms": 2933,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "unavailable-travel-policy",
+        "http": 200,
+        "latency_ms": 2489,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-leave-balance",
+        "http": 200,
+        "latency_ms": 1988,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-leave-supervisor",
+        "http": 200,
+        "latency_ms": 2353,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": 0,
+        "precision": 0,
+        "negative_empty": null,
+        "result_count": 0
+      },
+      {
+        "id": "holdout-support-schedule",
+        "http": 200,
+        "latency_ms": 1990,
+        "first_source": "qa-support-policy.pdf",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 0.6666666666666666,
+        "negative_empty": null,
+        "result_count": 3
+      },
+      {
+        "id": "holdout-training-cap",
+        "http": 200,
+        "latency_ms": 1894,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": 1,
+        "precision": 1,
+        "negative_empty": null,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-laptop",
+        "http": 200,
+        "latency_ms": 2194,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-carryover",
+        "http": 200,
+        "latency_ms": 2216,
+        "first_source": "ingestion-smoke-test.txt",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-training-deadline",
+        "http": 200,
+        "latency_ms": 2382,
+        "first_source": "qa-training-policy.docx",
+        "status": "MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": false,
+        "result_count": 1
+      },
+      {
+        "id": "holdout-vpn",
+        "http": 200,
+        "latency_ms": 1918,
+        "first_source": null,
+        "status": "NO_RELEVANT_MATCHES",
+        "recall_at_5": null,
+        "precision": 0,
+        "negative_empty": true,
+        "result_count": 0
+      }
+    ]
+  }
+}

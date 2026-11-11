@@ -8,6 +8,7 @@ import argparse
 import asyncio
 import json
 import secrets
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -89,18 +90,22 @@ async def main(dataset):
             token = login.json()["access_token"]
             results = []
             for case in source["cases"]:
+                started = time.perf_counter()
                 response = await client.post(
                     "/api/v1/retrieval/search",
                     headers={"Authorization": "Bearer " + token},
                     json={"query": case["query"]},
                 )
                 payload = response.json()
-                names = {p["filename"] for p in payload.get("passages", [])}
+                passages = payload.get("passages", [])
+                names = {p["filename"] for p in passages}
                 expected = set(case["expected"])
                 results.append(
                     {
                         "id": case["id"],
                         "http": response.status_code,
+                        "latency_ms": round((time.perf_counter() - started) * 1000),
+                        "first_source": passages[0]["filename"] if passages else None,
                         "status": payload.get(
                             "status", payload.get("error", {}).get("code")
                         ),
@@ -122,7 +127,7 @@ async def main(dataset):
                     {
                         "dataset_version": source["version"],
                         "cutoff": settings.retrieval_min_score,
-                        "mean_recall_at_5": sum(positive) / len(positive),
+                        "mean_recall_at_5": sum(positive) / len(positive) if positive else None,
                         "cases": results,
                     }
                 )
