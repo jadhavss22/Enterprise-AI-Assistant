@@ -6,12 +6,14 @@ from fastapi.responses import JSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from redis.asyncio import Redis
 
+from app.admin_dashboard import router as dashboard_router
 from app.auth.admin_routes import router as admin_users_router
 from app.auth.errors import install_auth_errors
 from app.auth.routes import router as auth_router
 from app.auth.routes import users_router
 from app.auth.security import validate_security_settings
 from app.auth.storage import ensure_auth_storage
+from app.chat.feedback import router as feedback_router
 from app.chat.routes import router as chat_router
 from app.chat.storage import ensure_chat_storage
 from app.config import settings
@@ -74,6 +76,14 @@ app.add_middleware(
     error_code="CHAT_BODY_TOO_LARGE",
     error_message="Chat request is too large",
 )
+app.add_middleware(
+    UploadBodyLimitMiddleware,
+    path="/api/v1/messages",
+    path_prefix=True,
+    max_body_bytes=16384,
+    error_code="FEEDBACK_BODY_TOO_LARGE",
+    error_message="Feedback request is too large",
+)
 # CORS must wrap the request/error middleware so failures reach browser clients.
 app.add_middleware(
     CORSMiddleware,
@@ -92,9 +102,11 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(admin_users_router)
+app.include_router(dashboard_router)
 app.include_router(documents_router)
 app.include_router(retrieval_router)
 app.include_router(chat_router)
+app.include_router(feedback_router)
 
 
 @app.get("/health/live", tags=["health"])

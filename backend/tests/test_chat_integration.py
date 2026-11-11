@@ -469,3 +469,46 @@ async def test_history_rechecks_earlier_sources_after_page_assembly(
         and not t["is_complete"]
         for t in turns
     )
+
+
+@pytest.mark.asyncio
+async def test_feedback_owner_upsert_visibility_and_deletion(env, monkeypatch):
+    provider, document, _, cid, headers = await setup(env, monkeypatch)
+    client, db = env["client"], env["db"]
+    path = f"/api/v1/conversations/{cid}"
+    response = await client.post(
+        path + "/messages/stream",
+        headers=headers,
+        json={"question": "How many leave days?", "client_request_id": str(uuid4())},
+    )
+    assert events(response)[-1][0] == "completed"
+    turn = (await client.get(path + "/messages", headers=headers)).json()["turns"][0]
+    feedback_path = f"/api/v1/messages/{turn['turn_id']}/feedback"
+    down = {"rating": "THUMBS_DOWN", "comment": "More context, please."}
+    replies = await asyncio.gather(*[
+        client.post(feedback_path, headers=headers, json=down) for _ in range(2)
+    ])
+    assert sorted(reply.status_code for reply in replies) == [200, 201]
+    assert all(reply.headers["cache-control"] == "no-store" for reply in replies)
+    assert await db.feedback.count_documents({}) == 1
+    turn = (await client.get(path + "/messages", headers=headers)).json()["turns"][0]
+    assert turn["feedback"]["comment"] == down["comment"]
+
+    employee = await create(env, "feedback-other@example.com")
+    auth = await login(env, employee["email"])
+    assert (await client.post(feedback_path, headers=bearer(auth[0]), json=down)).status_code == 404
+    oversized = await client.post(
+        feedback_path, headers=headers, json=down | {"comment": "x" * 17000}
+    )
+    assert oversized.status_code == 413
+    too_long = down | {"comment": "x" * 1001}
+    assert (await client.post(feedback_path, headers=headers, json=too_long)).status_code == 422
+    up = await client.post(feedback_path, headers=headers, json={"rating": "THUMBS_UP"})
+    assert up.status_code == 200 and up.json()["comment"] is None
+    assert provider.calls == 1
+    await db.documents.update_one({"_id": document["_id"]}, {"$set": {"active_index_version": 2}})
+    assert (await client.post(feedback_path, headers=headers, json=down)).status_code == 409
+    turn = (await client.get(path + "/messages", headers=headers)).json()["turns"][0]
+    assert turn["status"] == "HIDDEN" and turn["feedback"] is None
+    assert (await client.delete(path, headers=headers)).status_code == 204
+    assert await db.feedback.count_documents({}) == 0

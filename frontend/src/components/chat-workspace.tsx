@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth, type ApiError } from "../lib/auth-context";
+import { AnswerFeedback, type Feedback } from "./answer-feedback";
 import { PlaceholderShell } from "./placeholder-shell";
 
 type Conversation = { conversation_id: string; title: string };
 type Citation = { source_id: string; document_id: string; filename: string; page: number | null; source_path: string };
-type Turn = { turn_id: string; client_request_id: string; question: string; answer: string; citations: Citation[]; status: string; is_complete: boolean };
+type Turn = { turn_id: string; client_request_id: string; question: string; answer: string; citations: Citation[]; status: string; is_complete: boolean; feedback?: Feedback | null };
 type Page = { conversations: Conversation[]; next_cursor: string | null };
 type MessagePage = { turns: Turn[]; next_cursor: string | null };
 type Issue = { message: string; code?: string; requestId?: string; retryUntil?: number };
@@ -195,7 +196,11 @@ function ChatPanel({ historyOnly }: { historyOnly: boolean }) {
         <div className="chat-toolbar"><label>Conversation title<input value={title} maxLength={100} onChange={event => setTitle(event.target.value)} /></label><button className="button subtle" disabled={busy || loading || !title.trim()} onClick={() => void rename()}>Rename</button><button className="button subtle" disabled={busy || loading} onClick={() => void remove()}>Delete conversation</button><button className="button subtle" disabled={busy} onClick={() => void loadMessages(selected).catch(error => setIssue(issueFor(error)))}>Reload messages</button></div>
         {messageCursor && <button className="button subtle" disabled={busy} onClick={() => void loadMessages(selected, messageCursor).catch(error => setIssue(issueFor(error)))}>Load older messages</button>}
         <div className="chat-messages" aria-busy={busy}>
-          {turns.map(turn => <article key={turn.turn_id} className="chat-turn"><h2>You</h2><p className="passage-text">{turn.question}</p><h2>Assistant</h2>{turn.is_complete ? <><p className="passage-text">{turn.answer}</p><div className="document-actions">{turn.citations.map(citation => <button key={citation.source_id} className="button subtle small-button" onClick={() => void source(citation)}>{citation.source_id}: {citation.filename}{citation.page ? ` · Page ${citation.page}` : ""}</button>)}</div></> : <p>{turn.status === "HIDDEN" ? "Answer hidden because its source access or version changed." : `Answer incomplete (${turn.status.toLowerCase()}). You can submit another question.`}</p>}</article>)}
+          {turns.map(turn => <article key={turn.turn_id} className="chat-turn"><h2>You</h2><p className="passage-text">{turn.question}</p><h2>Assistant</h2>{turn.is_complete ? <><p className="passage-text">{turn.answer}</p><div className="document-actions">{turn.citations.map(citation => <button key={citation.source_id} className="button subtle small-button" onClick={() => void source(citation)}>{citation.source_id}: {citation.filename}{citation.page ? ` · Page ${citation.page}` : ""}</button>)}</div><AnswerFeedback turnId={turn.turn_id} saved={turn.feedback} onSaved={feedback => {
+            // An in-flight history refresh may contain the previous vote.
+            messageRequest.current++;
+            setTurns(old => old.map(item => item.turn_id === turn.turn_id && item.is_complete ? { ...item, feedback } : item));
+          }} /></> : <p>{turn.status === "HIDDEN" ? "Answer hidden because its source access or version changed." : `Answer incomplete (${turn.status.toLowerCase()}). You can submit another question.`}</p>}</article>)}
           {busy && <article className="chat-turn"><h2>Assistant — provisional</h2><p className="muted-note">Checking sources and generating. This text is unverified until the answer completes.</p><p className="passage-text">{partial || "Working…"}</p></article>}
         </div>
         <form className="document-upload-form" onSubmit={event => void send(event)}><label htmlFor="chat-question">Your question</label><textarea id="chat-question" rows={3} maxLength={2000} value={question} disabled={busy} onChange={event => setQuestion(event.target.value)} required /><p className="muted-note">Answers use authorized documents. If evidence is insufficient, the assistant will say so. Keep questions short.</p><div className="document-actions"><button className="button primary" disabled={busy || !question.trim() || wait > 0} type="submit">Send question</button>{busy && <button className="button subtle" type="button" onClick={() => void stop()}>Stop generation</button>}</div></form>

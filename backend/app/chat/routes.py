@@ -7,6 +7,7 @@ from fastapi.responses import StreamingResponse
 from app.auth.dependencies import current_user, get_db, get_redis
 from app.auth.rate_limits import rate_limit
 from app.chat import service
+from app.chat.feedback import public_feedback
 from app.chat.schemas import ChatRequest, ConversationWrite
 from app.config import settings
 
@@ -104,9 +105,18 @@ async def messages(
         .to_list(length=limit + 1)
     )
     turns = [await service.public_turn(db, actor, turn) for turn in rows[:limit]]
+    feedback = {
+        str(row["message_id"]): public_feedback(row)
+        for row in await db.feedback.find(
+            {"message_id": {"$in": [row["_id"] for row in rows[:limit]]},
+             "user_id": actor["_id"]}
+        ).to_list(length=limit)
+    }
     # Conversation deletion during the ACL reads must not disclose its messages.
     await service.owned(db, cid, actor)
     await service.revalidate_public_turns(db, actor, rows[:limit], turns)
+    for turn in turns:
+        turn["feedback"] = feedback.get(turn["turn_id"]) if turn["is_complete"] else None
     return {
         "turns": list(reversed(turns)),
         "next_cursor": str(rows[limit - 1]["_id"]) if len(rows) > limit else None,

@@ -38,6 +38,7 @@ def install_auth_errors(app):
                 "/api/v1/documents",
                 "/api/v1/ingestion-jobs",
                 "/api/v1/conversations",
+                "/api/v1/messages",
             )
         ):
             response.headers["Cache-Control"] = "no-store"

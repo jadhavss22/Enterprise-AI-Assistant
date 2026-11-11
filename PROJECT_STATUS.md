@@ -1,4 +1,28 @@
-## History review fixes and dev checkpoint — 4 November 2026
+## Dashboard checkpoint and retrieval baseline - 11 November 2026
+
+Reviewed the dashboard, feedback, and Compose startup change on dev. The updated container reached Next.js Ready and the dashboard route returned HTTP 200. Prior rendered browser verification with synthetic data covered chart/table toggles, activity windows, refresh, mobile layout and API failure. The user confirmed live Admin acceptance on 11 November and previously confirmed feedback browser acceptance. The user authorized committing and pushing the dashboard, feedback, and Compose startup checkpoint to dev.
+
+The checkpoint review added no-store caching headers to feedback responses, which can contain user comments. The running frontend container returned HTTP 200 for /admin and Compose configuration validation passed. Nine dashboard/chat integration tests passed, and the focused feedback rerun verified the cache header. Ruff, frontend ESLint, TypeScript, and diff checks passed. The separate retrieval baseline JSON files remain local for the next retrieval experiment.
+
+Live retrieval on the three synthetic fixtures used the same 12 questions at cutoffs 0.25 and 0.20. At 0.25 the expected sources were found for 8/9 supported questions and all 3 unsupported questions returned no matches. At 0.20 recall improved to 9/9 and the unsupported airfare question returned an irrelevant passage. The first baseline batch hit the configured request limit for its final two cases. Those cases were rerun successfully in a separate batch. Results and questions are in evaluation/retrieval-baseline-v2-results.json and evaluation/retrieval-baseline-v2.json. The lower cutoff was evaluation-only. Next experiment: broader candidate retrieval followed by relevance reranking and rejection, compared against this baseline.
+
+## Admin dashboard visual redesign - 10 November 2026
+
+The dashboard now shows key metric cards, horizontal comparisons for chat, feedback, document statuses and user roles, a charts/tables toggle, 7/30-day controls, health badges and admin shortcuts. The redesign uses the existing dashboard API.
+
+Fresh frontend ESLint, TypeScript and isolated production build passed. A rendered headless Edge check using synthetic authenticated API responses passed charts, tables, date-window requests, refresh, mobile-width overflow and unavailable/unknown states when the API cannot be reached. Docker's Linux engine was stopped during verification. Live Admin Chrome acceptance on localhost:3000 is pending. Changes remain uncommitted on dev.
+
+## Admin dashboard and feedback review - 5 November 2026
+
+User confirmed all feedback browser checks passed. Implemented the approved Admin-only dashboard with current document/user counts, 7/30-day ingestion/chat/feedback counts and separate API/embedding worker health. The dashboard exposes aggregates only. Failed metric queries show Unavailable, and a missing worker heartbeat does not affect counts. Usage reflects retained chat records. Feedback windows use first rating time.
+
+Reviewed both changes and added a 16 KiB feedback request-body limit before JSON parsing. Nine chat/dashboard integration tests passed against isolated MongoDB and Redis, plus the focused feedback rerun after adding the body cap. Ruff, frontend lint and TypeScript passed. Dashboard API route is present in the running API. Worker states were exercised with controlled doubles. Dashboard Chrome acceptance remains pending. Changes are uncommitted on dev.
+
+## Answer feedback checkpoint - 5 November 2026
+
+User confirmed personal Chrome acceptance for chat and history, including the expected interrupted state after Stop and reload. Feedback is implemented on dev and awaits user browser acceptance. Completed visible answers show one-click Helpful and Unhelpful controls. Unhelpful opens an optional comment. Switching to Helpful clears the comment. FastAPI checks ownership and current source access. A unique MongoDB index enforces one rating per answer per user. History restores feedback and conversation deletion removes it. Feedback makes no model calls.
+
+## History review fixes and dev checkpoint ï¿½ 4 November 2026
 
 C1/P1 and C2/P2 from the AI Chat review are fixed. History performs its conversation-deletion guard, revalidates the actor, then reads the entire page's source ACLs/active versions in one final batch; affected answers and citations are hidden with no further asynchronous work before returning. This is a final-read authorization boundary, not a claim that permissions cannot change after a database read or response transmission.
 

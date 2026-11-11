@@ -105,6 +105,7 @@ async def mutate_conversation(db, cid, actor, *, title=None, delete=False):
             update.update(
                 deleted_at=utcnow(), lease_until=utcnow(), active_request=None
             )
+            await db.feedback.delete_many({"conversation_id": oid(cid)}, session=session)
             await db.chat_turns.delete_many(
                 {"conversation_id": oid(cid)}, session=session
             )

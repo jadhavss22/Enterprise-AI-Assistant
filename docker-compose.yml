@@ -2,7 +2,7 @@ services:
   frontend:
     image: node:22-bookworm
     working_dir: /workspace
-    command: sh -c "npm ci && npm run dev"
+    command: sh -c "npm ci --prefer-offline --no-audit --no-fund && exec npm run dev"
     volumes:
       - ./frontend:/workspace
       - frontend_node_modules:/workspace/node_modules
