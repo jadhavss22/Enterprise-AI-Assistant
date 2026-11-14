@@ -1,3 +1,9 @@
+## GitHub Actions CI - 13 November 2026
+
+Added .github/workflows/ci.yml for pull requests to dev/main, pushes to dev, and manual runs. The backend job installs locked Python 3.12 dependencies, runs Ruff, and runs pytest with disposable MongoDB replica set, Redis, and Azurite services. The frontend job uses Node 22 and npm ci, then runs ESLint, TypeScript and a production build. CI uses no live Gemini or Pinecone credentials.
+
+Pre-push review pinned Setup Node to the verified v6 commit. Fresh Linux Node 22 verification passed npm ci, ESLint, TypeScript, and the exact Turbopack production build command. Backend lint and lockfile checks passed. The clean committed backend snapshot passed 170 tests in 375.93 seconds with MongoDB, Redis, and the Azurite transport test enabled. GitHub-hosted verification is pending the push. Confirm both jobs before requiring the checks for merges.
+
 ## Retrieval experiment review checkpoint
 
 Reviewed the opt-in reranking and fallback paths. The default search and chat calls omit the reranker. The new gating regression verifies that a candidate at the 0.25 baseline cutoff bypasses the model and that a broader candidate can be scored when there are no baseline candidates. The authenticated integration regression verifies that the default path rejects a 0.22 candidate and that a private share revocation and an index version change during reranking prevent either candidate from being returned.
