@@ -1,0 +1,273 @@
+{
+  "dataset": "retrieval-fallback-v3.json",
+  "grading": "Human review of completed answer and cited synthetic passages. Filename lookup cases excluded from Chat.",
+  "cases": [
+    {
+      "id": "leave-allowance",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt",
+        "qa-support-policy.pdf",
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "leave-approval",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "helpdesk-hours",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt",
+        "qa-support-policy.pdf"
+      ],
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "support-hours",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt",
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "qa-support-policy.pdf"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "training-budget",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "qa-training-policy.docx"
+      ],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "qa-training-policy.docx"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "training-currency",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "qa-training-policy.docx"
+      ],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "qa-training-policy.docx"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "unrelated-astronomy",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_without_passages"
+    },
+    {
+      "id": "unrelated-cooking",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_without_passages"
+    },
+    {
+      "id": "paraphrased-time-off",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "retrieval_miss"
+    },
+    {
+      "id": "unavailable-travel-policy",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_without_passages"
+    },
+    {
+      "id": "holdout-leave-balance",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "retrieval_miss"
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "retrieval_miss"
+    },
+    {
+      "id": "holdout-support-schedule",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt",
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "qa-support-policy.pdf"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "holdout-training-cap",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [
+        "qa-training-policy.docx"
+      ],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [
+        "qa-training-policy.docx"
+      ],
+      "abstained": false,
+      "assessment": "supported_cited_answer"
+    },
+    {
+      "id": "holdout-laptop",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_with_related_passages"
+    },
+    {
+      "id": "holdout-carryover",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_with_related_passages"
+    },
+    {
+      "id": "holdout-training-deadline",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_with_related_passages"
+    },
+    {
+      "id": "holdout-vpn",
+      "http": 200,
+      "completed": true,
+      "expected_sources": [],
+      "retrieved_sources": [],
+      "cited_sources": [],
+      "abstained": true,
+      "assessment": "abstained_without_passages"
+    }
+  ],
+  "rewrite": [
+    {
+      "kind": "rewrite",
+      "variant": "original",
+      "http": 200,
+      "sources": [],
+      "expected_source_found": false
+    },
+    {
+      "kind": "rewrite",
+      "variant": "rewrite",
+      "http": 200,
+      "sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "expected_source_found": true
+    }
+  ]
+}

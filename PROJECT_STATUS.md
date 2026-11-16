@@ -1,8 +1,32 @@
+## Query rewrite checkpoint - 16 November 2026
+
+Automatic search retry remains disabled by default. With the flag enabled, recognized transient failures from the optional second retrieval preserve the first no-match result, so chat completes with the normal insufficient-evidence response. Authorization errors and cancellation still propagate. The local chat and grounding suite passed 32 tests. The three new regression cases passed again after adding an exact streamed-response assertion. Ruff and diff checks passed. The live comparison remains inconclusive, so keep the flag off.
+
 ## GitHub Actions CI - 13 November 2026
 
 Added .github/workflows/ci.yml for pull requests to dev/main, pushes to dev, and manual runs. The backend job installs locked Python 3.12 dependencies, runs Ruff, and runs pytest with disposable MongoDB replica set, Redis, and Azurite services. The frontend job uses Node 22 and npm ci, then runs ESLint, TypeScript and a production build. CI uses no live Gemini or Pinecone credentials.
 
-Pre-push review pinned Setup Node to the verified v6 commit. Fresh Linux Node 22 verification passed npm ci, ESLint, TypeScript, and the exact Turbopack production build command. Backend lint and lockfile checks passed. The clean committed backend snapshot passed 170 tests in 375.93 seconds with MongoDB, Redis, and the Azurite transport test enabled. GitHub-hosted verification is pending the push. Confirm both jobs before requiring the checks for merges.
+Pre-push review pinned Setup Node to the verified v6 commit. Fresh Linux Node 22 verification passed npm ci, ESLint, TypeScript, and the exact Turbopack production build command. Backend lint and lockfile checks passed. The clean committed backend snapshot passed 170 tests in 375.93 seconds with MongoDB, Redis, and the Azurite transport test enabled. Both jobs passed on the first hosted run (https://github.com/jadhavss22/Enterprise-AI-Assistant/actions/runs/43564900049). Both checks are now required on dev under ruleset 27353515.
+
+## Local query rewrite comparison - 13 November 2026
+
+Gemini rewrite probes continued to time out. Added an evaluation-only --local-rewrite option that normalizes leave terminology. The live 18-case suite plus retries recovered two of the three missed questions with supported citations. Vacation sign-off took 14.849 seconds and leave allowance took 24.675 seconds in the full run, compared with baseline abstentions of 2.921 and 3.535 seconds from the priority comparison. Supervisor permission still returned no passages. Of the original eight supported cases, six completed with supporting citations. Of seven unsupported cases, six completed and abstained. Provider timeouts and rate limits prevented completing the other three cases after retry. Keep automatic query rewriting disabled. Results are in evaluation/chat/local-query-rewrite-comparison-2026-11-13.json. Targeted Ruff and diff checks passed.
+
+## Query rewrite comparison resume - 13 November 2026
+
+The evaluation runner now supports --mode and repeated --case-id filters. After the daily quota retry window, restarted the local API and worker. All three priority leave questions completed with abstentions after one search each (27.747, 29.718, and 32.641 seconds). A separate probe through the same rewrite helper reported CHAT_TIMEOUT. No successful second search or retry latency was measured. The comparison remains incomplete and the feature stays disabled by default. See evaluation/chat/query-retry-resume-2026-11-13.json.
+
+## Automatic Chat query rewrite experiment - 12 November 2026
+
+Added the opt-in CHAT_QUERY_RETRY_ENABLED setting (default false). On NO_RELEVANT_MATCHES the pipeline can rephrase once and repeat permission-aware retrieval. Existing matches and NO_ACCESSIBLE_DOCUMENTS skip the retry. Generation retains the original standalone question or the resolved follow-up, and the usual source checks and abstention apply. A provider rewrite error leaves the empty search result in place. The evaluation runner supports --compare-retry for fresh conversations and records stream duration and search attempts.
+
+Chat integration and grounding tests passed (29), including five retry conditions. Targeted Ruff passed. The live 18-case comparison attempted both modes: baseline completed 14/18 and retry mode completed 7/18, with remaining streams ending in CHAT_TIMEOUT or CHAT_RATE_LIMITED. A separate synthetic probe confirmed the provider's daily quota was exhausted. No rewrite-enabled case reached a second search. This run cannot assess recall gains, abstention preservation, or successful retry latency. Per-case timings and errors are in evaluation/chat/query-retry-comparison-2026-11-12.json. Repeat the live comparison after provider quota is available.
+
+## Live AI Chat answerability and query rewrite - 12 November 2026
+
+Added an opt-in evaluation runner using fresh conversations in the disposable synthetic live-chat fixture database. Evaluated all 18 natural-language questions from retrieval-fallback-v3, excluding the two filename lookups. All Chat streams completed. Manual evidence review found 8 supported cited answers and 3 supported questions where retrieval returned no passages and Chat abstained. All 7 unsupported questions correctly abstained, including laptop reimbursement, leave carryover and training claim deadline where related passages were retrieved. Results store verdicts and source filenames without raw generated text or passage contents.
+
+The separate live retrieval comparison returned no source for the original vacation sign-off query and found the expected leave policy for the manually rewritten annual-leave approval query. This checks a single manual rewrite, not an automatic rewriting policy. See evaluation/chat/answerability-results-2026-11-12.json.
 
 ## Retrieval experiment review checkpoint
 

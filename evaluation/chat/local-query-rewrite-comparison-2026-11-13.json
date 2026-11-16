@@ -1,0 +1,399 @@
+{
+  "variant": "local terminology rewrite, evaluation only",
+  "priority_pairs": [
+    {
+      "id": "paraphrased-time-off",
+      "mode": "baseline",
+      "latency_ms": 2921,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "holdout-leave-balance",
+      "mode": "baseline",
+      "latency_ms": 3535,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "mode": "baseline",
+      "latency_ms": 2480,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "paraphrased-time-off",
+      "mode": "retry",
+      "latency_ms": 11990,
+      "completed": true,
+      "abstained": false,
+      "search_count": 2,
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-leave-balance",
+      "mode": "retry",
+      "latency_ms": 35364,
+      "completed": false,
+      "abstained": false,
+      "search_count": 2,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "mode": "retry",
+      "latency_ms": 7896,
+      "completed": true,
+      "abstained": true,
+      "search_count": 2,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    }
+  ],
+  "full_run": [
+    {
+      "id": "leave-allowance",
+      "mode": "retry",
+      "latency_ms": 19395,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt",
+        "qa-support-policy.pdf",
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "leave-approval",
+      "mode": "retry",
+      "latency_ms": 16535,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": []
+    },
+    {
+      "id": "helpdesk-hours",
+      "mode": "retry",
+      "latency_ms": 34887,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt",
+        "qa-support-policy.pdf"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    },
+    {
+      "id": "support-hours",
+      "mode": "retry",
+      "latency_ms": 35510,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt",
+        "qa-training-policy.docx"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    },
+    {
+      "id": "training-budget",
+      "mode": "retry",
+      "latency_ms": 83666,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "qa-training-policy.docx"
+      ],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "training-currency",
+      "mode": "retry",
+      "latency_ms": 17026,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "qa-training-policy.docx"
+      ],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "unrelated-astronomy",
+      "mode": "retry",
+      "latency_ms": 4199,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "unrelated-cooking",
+      "mode": "retry",
+      "latency_ms": 3707,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "paraphrased-time-off",
+      "mode": "retry",
+      "latency_ms": 14849,
+      "completed": true,
+      "abstained": false,
+      "search_count": 2,
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": []
+    },
+    {
+      "id": "unavailable-travel-policy",
+      "mode": "retry",
+      "latency_ms": 2259,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "holdout-leave-balance",
+      "mode": "retry",
+      "latency_ms": 24675,
+      "completed": true,
+      "abstained": false,
+      "search_count": 2,
+      "cited_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "mode": "retry",
+      "latency_ms": 5416,
+      "completed": true,
+      "abstained": true,
+      "search_count": 2,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    },
+    {
+      "id": "holdout-support-schedule",
+      "mode": "retry",
+      "latency_ms": 17432,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "qa-support-policy.pdf"
+      ],
+      "retrieved_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt",
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-training-cap",
+      "mode": "retry",
+      "latency_ms": 33814,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    },
+    {
+      "id": "holdout-laptop",
+      "mode": "retry",
+      "latency_ms": 10884,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-carryover",
+      "mode": "retry",
+      "latency_ms": 14959,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-training-deadline",
+      "mode": "retry",
+      "latency_ms": 36309,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    },
+    {
+      "id": "holdout-vpn",
+      "mode": "retry",
+      "latency_ms": 2806,
+      "completed": true,
+      "abstained": true,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [],
+      "errors": []
+    }
+  ],
+  "retries": [
+    {
+      "id": "helpdesk-hours",
+      "mode": "retry",
+      "latency_ms": 3795,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "ingestion-smoke-test.txt",
+        "qa-support-policy.pdf"
+      ],
+      "errors": [
+        "CHAT_RATE_LIMITED"
+      ]
+    },
+    {
+      "id": "support-hours",
+      "mode": "retry",
+      "latency_ms": 18973,
+      "completed": true,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [
+        "qa-support-policy.pdf"
+      ],
+      "retrieved_sources": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt",
+        "qa-training-policy.docx"
+      ],
+      "errors": []
+    },
+    {
+      "id": "holdout-training-cap",
+      "mode": "retry",
+      "latency_ms": 2851,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": [
+        "CHAT_RATE_LIMITED"
+      ]
+    },
+    {
+      "id": "holdout-training-deadline",
+      "mode": "retry",
+      "latency_ms": 32596,
+      "completed": false,
+      "abstained": false,
+      "search_count": 1,
+      "cited_sources": [],
+      "retrieved_sources": [
+        "qa-training-policy.docx"
+      ],
+      "errors": [
+        "CHAT_TIMEOUT"
+      ]
+    }
+  ]
+}

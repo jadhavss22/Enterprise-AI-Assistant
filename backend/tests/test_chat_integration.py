@@ -512,3 +512,91 @@ async def test_feedback_owner_upsert_visibility_and_deletion(env, monkeypatch):
     assert turn["status"] == "HIDDEN" and turn["feedback"] is None
     assert (await client.delete(path, headers=headers)).status_code == 204
     assert await db.feedback.count_documents({}) == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("enabled", "first_status", "second_found", "should_retry", "should_answer"),
+    [
+        (False, "NO_RELEVANT_MATCHES", False, False, False),
+        (True, "NO_ACCESSIBLE_DOCUMENTS", False, False, False),
+        (True, "MATCHES", False, False, True),
+        (True, "NO_RELEVANT_MATCHES", True, True, True),
+        (True, "NO_RELEVANT_MATCHES", False, True, False),
+    ],
+)
+async def test_query_retry_preserves_question_and_abstention(
+    env, monkeypatch, enabled, first_status, second_found, should_retry, should_answer
+):
+    provider, _, passage, cid, headers = await setup(env, monkeypatch)
+    monkeypatch.setattr(settings, "chat_query_retry_enabled", enabled)
+    original = "How much paid time off do I get?"
+    rewritten = "How many annual leave days does Cedar provide?"
+    searches = []
+    answer_questions = []
+    stream = provider.stream
+
+    async def observe_stream(messages):
+        answer_questions.append(json.loads(messages[-1]["content"])["question"])
+        async for part in stream(messages):
+            yield part
+
+    async def retrieve(db, actor, query, request_id):
+        searches.append(query)
+        status = first_status if len(searches) == 1 else (
+            "MATCHES" if second_found else "NO_RELEVANT_MATCHES"
+        )
+        return {"status": status, "passages": [passage] if status == "MATCHES" else []}
+
+    monkeypatch.setattr(provider, "stream", observe_stream)
+    monkeypatch.setattr(service, "retrieve", retrieve)
+    response = await env["client"].post(
+        f"/api/v1/conversations/{cid}/messages/stream",
+        headers=headers,
+        json={"question": original, "client_request_id": str(uuid4())},
+    )
+    assert response.status_code == 200
+    assert events(response)[-1][0] == "completed"
+    assert searches == ([original, rewritten] if should_retry else [original])
+    assert len(provider.rewrites) == int(should_retry)
+    assert answer_questions == ([original] if should_answer else [])
+    assert (ABSTENTION in response.text) is not should_answer
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("status", "code"),
+    [(503, "SEARCH_BUSY"), (503, "SEARCH_UNAVAILABLE"), (401, "UNAUTHORIZED")],
+)
+async def test_query_retry_search_failure(env, monkeypatch, status, code):
+    provider, _, _, cid, headers = await setup(env, monkeypatch)
+    monkeypatch.setattr(settings, "chat_query_retry_enabled", True)
+    searches = []
+
+    async def retrieve(db, actor, query, request_id):
+        searches.append(query)
+        if len(searches) == 1:
+            return {"status": "NO_RELEVANT_MATCHES", "passages": []}
+        raise HTTPException(status, detail={"code": code, "message": "Synthetic failure"})
+
+    monkeypatch.setattr(service, "retrieve", retrieve)
+    path = f"/api/v1/conversations/{cid}/messages"
+    response = await env["client"].post(
+        path + "/stream",
+        headers=headers,
+        json={"question": "How much paid time off?", "client_request_id": str(uuid4())},
+    )
+    assert response.status_code == 200
+    assert len(searches) == 2
+    assert provider.calls == 0
+    frames = events(response)
+    terminal, payload = frames[-1]
+    if status == 503:
+        assert terminal == "completed"
+        assert [data["text"] for event, data in frames if event == "token"] == [ABSTENTION]
+        history = await env["client"].get(path, headers=headers)
+        saved = history.json()["turns"][0]
+        assert saved["answer"] == ABSTENTION
+        assert saved["citations"] == []
+    else:
+        assert terminal == "error"
+        assert payload["code"] == code
