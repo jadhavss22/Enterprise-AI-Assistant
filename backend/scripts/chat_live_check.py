@@ -21,7 +21,7 @@ from app.main import app
 from app.workers.celery_app import embedding_runtime_probe
 
 
-async def main():
+async def main(evaluate=None):
     mongo = AsyncIOMotorClient(settings.mongodb_url, tz_aware=True)
     redis = Redis.from_url(settings.redis_url, decode_responses=True)
     name = "test_live_chat_" + uuid4().hex
@@ -81,6 +81,8 @@ async def main():
             )
             assert login.status_code == 200
             headers = {"Authorization": "Bearer " + login.json()["access_token"]}
+            if evaluate is not None:
+                return await evaluate(client, headers)
             created = await client.post(
                 "/api/v1/conversations",
                 headers=headers,

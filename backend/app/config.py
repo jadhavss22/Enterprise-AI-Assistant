@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     pinecone_api_key: str | None = None
     openai_api_key: str | None = None
     chat_rate_limit: int = Field(default=6, ge=1, le=30)
+    chat_query_retry_enabled: bool = False
     chat_provider: Literal["gemini"] = "gemini"
     gemini_api_key: str | None = Field(default=None, repr=False)
     gemini_chat_model: str = "gemini-3.6-flash"

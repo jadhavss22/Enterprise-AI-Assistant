@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "id": "paraphrased-time-off",
+      "latency_ms": 27747,
+      "search_count": 1,
+      "completed": true,
+      "abstained": true
+    },
+    {
+      "id": "holdout-leave-balance",
+      "latency_ms": 29718,
+      "search_count": 1,
+      "completed": true,
+      "abstained": true
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "latency_ms": 32641,
+      "search_count": 1,
+      "completed": true,
+      "abstained": true
+    }
+  ],
+  "diagnostic": "Separate live rewrite probe returned CHAT_TIMEOUT. No second searches observed."
+}
