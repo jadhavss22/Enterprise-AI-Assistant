@@ -9,7 +9,7 @@ from bson import ObjectId
 from test_admin_users import bearer, create, env, login  # noqa: F401
 
 from app.config import settings
-from app.retrieval import providers, routes, service, tasks
+from app.retrieval import lexical, providers, routes, service, tasks
 from app.retrieval.schemas import SearchRequest
 
 
@@ -81,7 +81,8 @@ async def test_namespace_requests_are_scoped_and_any_failure_fails_search(monkey
             return {"matches": []}
 
     monkeypatch.setattr(providers, "retrieval_index", Index)
-    matches, _ = await providers.search_namespaces(docs, [0.1] * 384)
+    matches, _, index = await providers.search_namespaces(docs, [0.1] * 384)
+    assert isinstance(index, Index)
     assert matches == [] and len(calls) == 2
     for call in calls:
         doc = next(d for d in docs if call["namespace"] == f"{d['_id']}-v2")
@@ -129,7 +130,7 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
 
     async def search(docs, vector):
         searched[:] = docs
-        return [(d, match(d)) for d in docs], 1
+        return [(d, match(d)) for d in docs], 1, None
 
     monkeypatch.setattr(service, "query_embedding", embedding)
     monkeypatch.setattr(service, "search_namespaces", search)
@@ -163,7 +164,7 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
             (d, match(d, score=0.4 + i / 100, chunk_index=i))
             for d in docs
             for i in range(10)
-        ] * 2, 1
+        ] * 2, 1, None
 
     monkeypatch.setattr(service, "search_namespaces", ranked)
     ranked_response = (await request()).json()
@@ -182,8 +183,10 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
     assert len((await request()).json()["passages"]) == 2
 
     # Exercise the opt-in path, then revoke access while the callback is running.
+    index = object()
+
     async def broad_search(docs, vector):
-        return [(doc, match(doc, score=0.22)) for doc in docs], 1
+        return [(doc, match(doc, score=0.22)) for doc in docs], 1, index
 
     async def rerank(query, candidates, filenames):
         assert set(filenames) == {str(allowed["_id"]), str(private["_id"])}
@@ -212,6 +215,47 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
         {"_id": private["_id"]}, {"$set": {"allowed_user_ids": [employee_id]}}
     )
 
+    # Keyword candidates can recover a semantic miss, but still use current ACLs.
+    async def keyword(docs, search_index):
+        assert search_index is index
+        assert {d["_id"] for d in docs} == {allowed["_id"], private["_id"]}
+        return [(doc, match(doc, score=None)) for doc in docs]
+
+    with monkeypatch.context() as hybrid:
+        hybrid.setattr(service, "search_namespaces", broad_search)
+        hybrid.setattr(lexical, "fetch_active_chunks", keyword)
+        hybrid.setattr(settings, "retrieval_min_score", 0.25)
+        hybrid.setattr(settings, "retrieval_hybrid_enabled", False)
+        assert (await request()).json()["passages"] == []
+        hybrid.setattr(settings, "retrieval_hybrid_enabled", True)
+        assert len((await request()).json()["passages"]) == 2
+
+        async def unavailable(_docs, _index):
+            raise TimeoutError
+
+        hybrid.setattr(lexical, "fetch_active_chunks", unavailable)
+        assert (await request()).json()["passages"] == []
+
+        async def keyword_revocation(docs, search_index):
+            results = await keyword(docs, search_index)
+            await db.documents.update_one(
+                {"_id": private["_id"]}, {"$set": {"allowed_user_ids": []}}
+            )
+            await db.documents.update_one(
+                {"_id": allowed["_id"]}, {"$set": {"active_index_version": 2}}
+            )
+            return results
+
+        hybrid.setattr(lexical, "fetch_active_chunks", keyword_revocation)
+        assert (await request()).json()["passages"] == []
+
+    await db.documents.update_one(
+        {"_id": allowed["_id"]}, {"$set": {"active_index_version": 1}}
+    )
+    await db.documents.update_one(
+        {"_id": private["_id"]}, {"$set": {"allowed_user_ids": [employee_id]}}
+    )
+
     async def revoke(docs, vector):
         await db.documents.update_one(
             {"_id": private["_id"]}, {"$set": {"allowed_user_ids": []}}
@@ -219,7 +263,7 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
         await db.documents.update_one(
             {"_id": allowed["_id"]}, {"$set": {"active_index_version": 2}}
         )
-        return [(d, match(d)) for d in docs], 1
+        return [(d, match(d)) for d in docs], 1, None
 
     monkeypatch.setattr(service, "search_namespaces", revoke)
     assert (await request()).json()["passages"] == []
@@ -228,7 +272,7 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
         await db.documents.update_one(
             {"_id": allowed["_id"]}, {"$set": {"deleted_at": now}}
         )
-        return [(d, match(d)) for d in docs], 1
+        return [(d, match(d)) for d in docs], 1, None
 
     monkeypatch.setattr(service, "search_namespaces", delete)
     assert (await request()).json()["passages"] == []
@@ -266,7 +310,7 @@ async def test_search_api_enforces_current_acl_versions_and_session(env, monkeyp
         await db.users.update_one(
             {"_id": employee_id}, {"$set": {"status": "DISABLED"}}
         )
-        return [(d, match(d)) for d in docs], 1
+        return [(d, match(d)) for d in docs], 1, None
 
     monkeypatch.setattr(service, "search_namespaces", disable)
     assert (await request()).status_code == 401

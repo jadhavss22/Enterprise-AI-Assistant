@@ -1,3 +1,43 @@
+## Hybrid retrieval checkpoint - 18 November 2026
+
+User authorized committing and pushing the reviewed hybrid retrieval feature and runtime fixes to dev. The implementation, evaluation runners and results, regression tests, and review report form this checkpoint. Verification from the review passed 26 retrieval and Chat tests, backend Ruff, focused format checks, and 52 live searches with zero keyword fetch errors. Hybrid retrieval remains disabled by default pending broader relevance evaluation. This entry precedes Git operations; verify the resulting commit and remote hash with Git.
+
+## Hybrid retrieval review - 18 November 2026
+
+Reviewed the opt-in retrieval path, provider deadlines and cancellation, authorization and active-version rechecks, keyword limits, fusion, and evaluation runners against dev.
+
+Two runtime findings were corrected. The keyword pass constructed a second Pinecone client and resolved its host inside the four-second deadline. Five read-only timing samples on the synthetic fixtures measured client setup at 2.88–4.65 seconds, with fresh fetches around 1.0–1.13 seconds. Retrieval now passes the semantic search's index client into the keyword pass.
+
+Keyword fetches also shared the required provider pool. A synchronous fetch can continue after asyncio cancellation and retain its permit, potentially making later semantic requests return PROVIDER_BUSY. Optional keyword calls now use a separate bounded pool, retain their permits until synchronous completion, and pass the remaining overall deadline to each fetch.
+
+The regression tests verify that the keyword pass receives the same index client and that a timed-out keyword call retains its own permit while the semantic provider pool remains available. Existing source authorization and active-version checks still run after both retrieval legs.
+
+Fresh verification passed all 26 retrieval, keyword, hardening, fallback experiment, and Chat integration tests against the local MongoDB replica set and Redis in 161.34 seconds. Backend Ruff and focused format checks passed. Initial runs encountered stopped test services, which were restored before the passing run.
+
+The corrected live benchmark ran inside the API container with the isolated embedding worker and three existing synthetic documents. All 52 measured searches returned HTTP 200. All 26 hybrid keyword passes completed without fetch errors, compared with 23 deadline failures in the earlier host run. The two runs used different execution environments, so their absolute latency values should not be treated as a controlled before/after comparison. A host retry stopped during warmup with READINESS_UNAVAILABLE before the successful container run.
+
+Within the successful container run, semantic and hybrid macro document recall@5 were 70.59% and 88.24%, with full recall on 12/17 and 15/17 supported questions. Unsupported questions with hits increased from 4/9 to 5/9. Median latency was 2.147 seconds semantic and 2.055 seconds hybrid, with p95 at 3.247 and 3.034 seconds. The hybrid pass incurred 78 additional fetch read units. Results are recorded in `evaluation/retrieval-hybrid-live-v2-results.json`.
+
+The prior quality evaluation found an additional unsupported question receiving a hit when keyword records were preloaded. Hybrid retrieval should remain opt-in pending a larger labeled evaluation with exact identifiers. This review does not establish production retrieval quality.
+
+## Hybrid retrieval benchmark - 16 November 2026
+
+Keep `RETRIEVAL_HYBRID_ENABLED=false`. Compared the normal 0.25-cutoff semantic route and the configured hybrid route through authenticated FastAPI requests, using live Pinecone and an isolated embedding worker. The 26 labeled questions combine the 20 v3 cases with four literal phrase controls and two overlapping unsupported questions. Both modes used the same three existing synthetic documents (one active chunk each), with the order alternated after warmup. The fixture contents do not support a live exact-identifier comparison.
+
+Among 25 successful pairs, macro document recall@5 rose from 68.8% to 75.0%, and full-recall questions rose from 11/16 to 12/16. Both modes returned hits on 4/9 unsupported questions and returned 10 passages from off-label documents. Paired p50 was 4.70 s semantic and 8.64 s hybrid, with a median within-pair increase of 3.80 s. Paired p95 was 6.75 s and 9.56 s. The unmatched semantic request returned HTTP 503 with PROVIDER_BUSY. The hybrid pass hit its deadline on 23/26 requests and observed 75 extra fetch read units across the measured run, including fetches that returned after the application deadline. The hybrid help-desk hours result recovered one expected source.
+
+A separate ranking diagnostic preloaded the three active Pinecone records and reused the same semantic candidates within each pair. All 26 pairs completed. Macro document recall@5 increased from 70.6% to 88.2%, and full recall rose from 12/17 to 15/17. Unsupported questions with hits rose from 4/9 to 5/9, and off-label passages increased from 11 to 12. The ranking diagnostic bypassed the live fetch deadline and does not provide production latency measurements. Next: address the fetch deadline failures, then rerun the live comparison with identifier cases and a larger corpus.
+
+Per-question results are in `evaluation/retrieval-hybrid-live-v1-results.json` and `evaluation/retrieval-hybrid-ranking-v1-results.json`. From `backend`, the runners are `python -m scripts.hybrid_retrieval_benchmark` and `python -m scripts.hybrid_retrieval_ranking_probe`, each with `--dataset ../evaluation/retrieval-fallback-v3.json --output <path>`. Use the local dev provider configuration and a dedicated embedding worker/Redis database. The evaluation used read-only Pinecone operations and disposable authentication state. No retrieval behavior or default was changed.
+
+## Hybrid retrieval prototype - 16 November 2026
+
+Implemented an opt-in keyword leg on codex/hybrid-retrieval from dev. RETRIEVAL_HYBRID_ENABLED defaults to false. The keyword leg fetches existing Pinecone records by deterministic active-version IDs using the same authorized document scope as semantic search. It matches contiguous normalized phrases and exact mixed letter/digit identifiers and combines the two rankings with reciprocal rank fusion. Document Search and Chat share the retrieval path. Existing reranking experiments remain isolated. Final actor, document visibility, and active-version checks still apply.
+
+The keyword pass has a 64-chunk scope cap and a four-second deadline. Larger scopes, unusable chunk counts, or optional fetch failures use existing semantic results. This is a bounded prototype and requires no re-ingestion. Next: compare semantic and hybrid on labeled synthetic questions for exact terms, supported paraphrases, and unrelated questions. Measure recall, irrelevant matches, latency, and fetch cost before considering a dedicated lexical index or changing the default.
+
+Fresh verification: 25 focused tests passed against local MongoDB and Redis with provider doubles, including semantic-miss recovery, timeout fallback, active-ID fetch limits, and share revocation and reindexing during keyword retrieval. Backend Ruff and diff checks passed. Live Pinecone retrieval and quality evaluation are pending. Local changes are ready for review.
+
 ## GitHub Actions CI - 13 November 2026
 
 Added .github/workflows/ci.yml for pull requests to dev/main, pushes to dev, and manual runs. The backend job installs locked Python 3.12 dependencies, runs Ruff, and runs pytest with disposable MongoDB replica set, Redis, and Azurite services. The frontend job uses Node 22 and npm ci, then runs ESLint, TypeScript and a production build. CI uses no live Gemini or Pinecone credentials.

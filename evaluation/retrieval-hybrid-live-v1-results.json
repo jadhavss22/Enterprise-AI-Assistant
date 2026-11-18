@@ -1,0 +1,1329 @@
+{
+  "dataset": "retrieval-fallback-v3.json",
+  "semantic_cutoff": 0.25,
+  "result_limit": 5,
+  "fixtures": {
+    "ingestion-smoke-test.txt": 1,
+    "qa-support-policy.pdf": 1,
+    "qa-training-policy.docx": 1
+  },
+  "summary": {
+    "semantic": {
+      "http_200": 25,
+      "positive_cases": 16,
+      "mean_document_recall_at_5": 0.6875,
+      "full_recall_cases": 11,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 5,
+      "irrelevant_passages": 10,
+      "latency_ms_p50": 4695,
+      "latency_ms_p95": 6751,
+      "fetch_calls": 0,
+      "fetch_records_requested": 0,
+      "fetch_records_returned": 0,
+      "fetch_read_units_reported": null,
+      "fetch_calls_with_read_units": 0,
+      "cases_with_fetch_errors": 0
+    },
+    "hybrid": {
+      "http_200": 26,
+      "positive_cases": 17,
+      "mean_document_recall_at_5": 0.7647,
+      "full_recall_cases": 13,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 6,
+      "irrelevant_passages": 11,
+      "latency_ms_p50": 8651.0,
+      "latency_ms_p95": 9558,
+      "fetch_calls": 75,
+      "fetch_records_requested": 75,
+      "fetch_records_returned": 75,
+      "fetch_read_units_reported": 75,
+      "fetch_calls_with_read_units": 75,
+      "cases_with_fetch_errors": 23
+    }
+  },
+  "paired_latency_delta_ms_p50": 3797,
+  "cases": [
+    {
+      "id": "leave-allowance",
+      "query": "How many annual leave days does Cedar Demo provide?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 6751,
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 2,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 9262,
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 2,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "leave-approval",
+      "query": "Who must approve an employee leave request?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8638,
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4236,
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "helpdesk-hours",
+      "query": "What days and hours is the IT help desk open?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 3805,
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8688,
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "support-hours",
+      "query": "When does Cedar Demo support operate?",
+      "expected": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8884,
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 503,
+        "status": "PROVIDER_BUSY",
+        "latency_ms": 2907,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "training-budget",
+      "query": "What is the yearly training reimbursement limit?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 5604,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8297,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "training-currency",
+      "query": "How many demo credits are reimbursed for training each year?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8669,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4629,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "unrelated-astronomy",
+      "query": "What is the mass of the planet Neptune?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 5728,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 8725,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "unrelated-cooking",
+      "query": "How do I bake a chocolate cake?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 7578,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 3781,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "exact-support-policy",
+      "query": "qa-support-policy.pdf",
+      "expected": [
+        "qa-support-policy.pdf"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4334,
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 7881,
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "exact-training-policy",
+      "query": "qa-training-policy.docx",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8664,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 3888,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "paraphrased-time-off",
+      "query": "Before taking vacation, whose sign-off is needed?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 5345,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 8800,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "unavailable-travel-policy",
+      "query": "What is the international airfare reimbursement policy?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 8429,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 4372,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-leave-balance",
+      "query": "What is the standard paid time off allowance each year?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 5815,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 9209,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "query": "Can I take annual leave without my supervisor's permission?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 8933,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 4695,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-support-schedule",
+      "query": "Which weekdays and hours can I contact Cedar Demo support?",
+      "expected": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4270,
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8594,
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-training-cap",
+      "query": "Is there an annual cap on professional development reimbursement?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 9198,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8426,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-laptop",
+      "query": "How much can staff claim for buying a laptop?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 5171,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8044,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "holdout-carryover",
+      "query": "How many unused annual leave days roll into next year?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 9558,
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 5440,
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-training-deadline",
+      "query": "What is the deadline for filing a training reimbursement claim?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 5764,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8224,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "holdout-vpn",
+      "query": "How do I reset my VPN credentials from home?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 10311,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 4796,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "literal-employee-manager",
+      "query": "approval from the employee's manager",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 6180,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 9509,
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "literal-helpdesk-hours",
+      "query": "Monday through Friday, 9 AM to 6 PM",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8074,
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": []
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 5605,
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "literal-training-credits",
+      "query": "1200 demo credits per year",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4121,
+        "returned_sources": [
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8323,
+        "returned_sources": [
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "literal-training-reimbursement",
+      "query": "reimburses fictional training costs",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8059,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4450,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    },
+    {
+      "id": "near-negative-training-appeal",
+      "query": "What is the appeal process for fictional training costs?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 4118,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [],
+        "fetch_errors": []
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "latency_ms": 8543,
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      }
+    },
+    {
+      "id": "near-negative-manager-escalation",
+      "query": "How do I escalate a rejected request to the employee's manager?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 8182,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          },
+          {
+            "requested": 1,
+            "returned": 1,
+            "read_units": 1
+          }
+        ],
+        "fetch_errors": [
+          "TimeoutError"
+        ]
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "latency_ms": 3913,
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0,
+        "fetches": [],
+        "fetch_errors": []
+      }
+    }
+  ],
+  "mode": "live",
+  "paired_summary": {
+    "semantic": {
+      "http_200": 25,
+      "positive_cases": 16,
+      "mean_document_recall_at_5": 0.6875,
+      "full_recall_cases": 11,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 5,
+      "irrelevant_passages": 10,
+      "latency_ms_p50": 4695,
+      "latency_ms_p95": 6751,
+      "fetch_calls": 0,
+      "fetch_records_requested": 0,
+      "fetch_records_returned": 0,
+      "fetch_read_units_reported": null,
+      "fetch_calls_with_read_units": 0,
+      "cases_with_fetch_errors": 0
+    },
+    "hybrid": {
+      "http_200": 25,
+      "positive_cases": 16,
+      "mean_document_recall_at_5": 0.75,
+      "full_recall_cases": 12,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 5,
+      "irrelevant_passages": 10,
+      "latency_ms_p50": 8638,
+      "latency_ms_p95": 9558,
+      "fetch_calls": 72,
+      "fetch_records_requested": 72,
+      "fetch_records_returned": 72,
+      "fetch_read_units_reported": 72,
+      "fetch_calls_with_read_units": 72,
+      "cases_with_fetch_errors": 22
+    }
+  }
+}

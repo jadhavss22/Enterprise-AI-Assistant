@@ -1,0 +1,704 @@
+{
+  "dataset": "retrieval-fallback-v3.json",
+  "semantic_cutoff": 0.25,
+  "result_limit": 5,
+  "fixtures": {
+    "ingestion-smoke-test.txt": 1,
+    "qa-support-policy.pdf": 1,
+    "qa-training-policy.docx": 1
+  },
+  "summary": {
+    "semantic": {
+      "http_200": 26,
+      "positive_cases": 17,
+      "mean_document_recall_at_5": 0.7059,
+      "full_recall_cases": 12,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 6,
+      "irrelevant_passages": 11
+    },
+    "hybrid": {
+      "http_200": 26,
+      "positive_cases": 17,
+      "mean_document_recall_at_5": 0.8824,
+      "full_recall_cases": 15,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 5,
+      "positive_cases_with_irrelevant_hits": 6,
+      "irrelevant_passages": 12
+    }
+  },
+  "cases": [
+    {
+      "id": "leave-allowance",
+      "query": "How many annual leave days does Cedar Demo provide?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 2
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-training-policy.docx",
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 2
+      }
+    },
+    {
+      "id": "leave-approval",
+      "query": "Who must approve an employee leave request?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "helpdesk-hours",
+      "query": "What days and hours is the IT help desk open?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt",
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "support-hours",
+      "query": "When does Cedar Demo support operate?",
+      "expected": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "training-budget",
+      "query": "What is the yearly training reimbursement limit?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "training-currency",
+      "query": "How many demo credits are reimbursed for training each year?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "unrelated-astronomy",
+      "query": "What is the mass of the planet Neptune?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "unrelated-cooking",
+      "query": "How do I bake a chocolate cake?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "exact-support-policy",
+      "query": "qa-support-policy.pdf",
+      "expected": [
+        "qa-support-policy.pdf"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "exact-training-policy",
+      "query": "qa-training-policy.docx",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "paraphrased-time-off",
+      "query": "Before taking vacation, whose sign-off is needed?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "unavailable-travel-policy",
+      "query": "What is the international airfare reimbursement policy?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "holdout-leave-balance",
+      "query": "What is the standard paid time off allowance each year?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "holdout-leave-supervisor",
+      "query": "Can I take annual leave without my supervisor's permission?",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "holdout-support-schedule",
+      "query": "Which weekdays and hours can I contact Cedar Demo support?",
+      "expected": [
+        "qa-support-policy.pdf",
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt",
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "holdout-training-cap",
+      "query": "Is there an annual cap on professional development reimbursement?",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "holdout-laptop",
+      "query": "How much can staff claim for buying a laptop?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "holdout-carryover",
+      "query": "How many unused annual leave days roll into next year?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "holdout-training-deadline",
+      "query": "What is the deadline for filing a training reimbursement claim?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "holdout-vpn",
+      "query": "How do I reset my VPN credentials from home?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "literal-employee-manager",
+      "query": "approval from the employee's manager",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 0
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "literal-helpdesk-hours",
+      "query": "Monday through Friday, 9 AM to 6 PM",
+      "expected": [
+        "ingestion-smoke-test.txt"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-support-policy.pdf"
+        ],
+        "recall_at_5": 0.0,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "literal-training-credits",
+      "query": "1200 demo credits per year",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx",
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "literal-training-reimbursement",
+      "query": "reimburses fictional training costs",
+      "expected": [
+        "qa-training-policy.docx"
+      ],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      },
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": 1.0,
+        "irrelevant_passages": 0
+      }
+    },
+    {
+      "id": "near-negative-training-appeal",
+      "query": "What is the appeal process for fictional training costs?",
+      "expected": [],
+      "first_mode": "semantic",
+      "semantic": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      },
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "qa-training-policy.docx"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      }
+    },
+    {
+      "id": "near-negative-manager-escalation",
+      "query": "How do I escalate a rejected request to the employee's manager?",
+      "expected": [],
+      "first_mode": "hybrid",
+      "hybrid": {
+        "http": 200,
+        "status": "MATCHES",
+        "returned_sources": [
+          "ingestion-smoke-test.txt"
+        ],
+        "recall_at_5": null,
+        "irrelevant_passages": 1
+      },
+      "semantic": {
+        "http": 200,
+        "status": "NO_RELEVANT_MATCHES",
+        "returned_sources": [],
+        "recall_at_5": null,
+        "irrelevant_passages": 0
+      }
+    }
+  ],
+  "mode": "preloaded-ranking-diagnostic",
+  "paired_summary": {
+    "semantic": {
+      "http_200": 26,
+      "positive_cases": 17,
+      "mean_document_recall_at_5": 0.7059,
+      "full_recall_cases": 12,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 4,
+      "positive_cases_with_irrelevant_hits": 6,
+      "irrelevant_passages": 11
+    },
+    "hybrid": {
+      "http_200": 26,
+      "positive_cases": 17,
+      "mean_document_recall_at_5": 0.8824,
+      "full_recall_cases": 15,
+      "negative_cases": 9,
+      "negative_cases_with_hits": 5,
+      "positive_cases_with_irrelevant_hits": 6,
+      "irrelevant_passages": 12
+    }
+  }
+}

@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     retrieval_max_documents: int = Field(default=25, ge=1, le=100)
     retrieval_candidate_limit: int = Field(default=20, ge=5, le=100)
     retrieval_result_limit: int = Field(default=5, ge=1, le=5)
+    retrieval_hybrid_enabled: bool = False
     retrieval_min_score: float = Field(default=0.25, ge=-1, le=1)
     retrieval_search_concurrency: int = Field(default=4, ge=1, le=8)
     retrieval_embedding_timeout_seconds: int = Field(default=20, ge=1, le=30)
