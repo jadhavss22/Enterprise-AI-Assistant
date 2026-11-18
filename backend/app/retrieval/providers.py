@@ -153,8 +153,10 @@ async def _search_namespaces(documents, vector):
         batches = await asyncio.wait_for(
             asyncio.gather(*tasks), settings.retrieval_search_timeout_seconds
         )
-        return [item for batch in batches for item in batch], round(
-            (time.monotonic() - started) * 1000
+        return (
+            [item for batch in batches for item in batch],
+            round((time.monotonic() - started) * 1000),
+            index,
         )
     finally:
         for task in tasks:

@@ -12,6 +12,7 @@ from app.config import settings
 from app.documents.access import visible_documents_query
 from app.documents.service import audit_admin_private_access
 from app.documents.validation import fail
+from app.retrieval import lexical
 from app.retrieval.providers import query_embedding, search_namespaces
 
 logger = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ def metadata_integer(value):
     return int(value)
 
 
-def checked_candidate(doc, match):
+def checked_candidate(doc, match, *, require_semantic_score=True):
     metadata = value(match, "metadata", {}) or {}
     if not isinstance(metadata, dict):
         return None
@@ -73,7 +74,7 @@ def checked_candidate(doc, match):
     expected = hashlib.sha256(f"{doc['_id']}:{version}:{chunk}".encode()).hexdigest()
     if value(match, "id") != expected:
         return None
-    if (
+    if require_semantic_score and (
         not isinstance(score, (int, float))
         or not math.isfinite(score)
         or score < settings.retrieval_min_score
@@ -93,6 +94,33 @@ def checked_candidate(doc, match):
         "text": text,
         "score": score,
     }
+
+
+async def add_keyword_candidates(documents, index, query, semantic, request_id):
+    query_phrases = lexical.phrases(query)
+    if not query_phrases:
+        return semantic
+    try:
+        matches = await lexical.fetch_active_chunks(documents, index)
+    except Exception as exc:  # noqa: BLE001 - optional provider leg, log no source data
+        logger.warning(
+            "retrieval.keyword_unavailable type=%s request_id=%s",
+            type(exc).__name__,
+            request_id,
+        )
+        return semantic
+    scored = {}
+    for doc, match in matches:
+        candidate = checked_candidate(doc, match, require_semantic_score=False)
+        if candidate and (
+            score := lexical.lexical_score(query_phrases, candidate["text"])
+        ):
+            scored[candidate["chunk_id"]] = (score, candidate)
+    ranked = [
+        item[1]
+        for _, item in sorted(scored.items(), key=lambda pair: (-pair[1][0], pair[0]))
+    ]
+    return lexical.fuse(semantic, ranked)[: settings.retrieval_candidate_limit]
 
 
 async def retrieve(db, actor, query, request_id, *, rerank=None):
@@ -129,7 +157,7 @@ async def _retrieve(db, actor, query, request_id, started, *, rerank=None):
         )
     try:
         vector = await query_embedding(query)
-        matches, search_ms = await search_namespaces(documents, vector)
+        matches, search_ms, index = await search_namespaces(documents, vector)
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001 - provider failures must not expose query/credentials
@@ -152,6 +180,10 @@ async def _retrieve(db, actor, query, request_id, started, *, rerank=None):
             candidates.append(candidate)
     candidates.sort(key=lambda c: (-c["score"], c["chunk_id"]))
     candidates = candidates[: settings.retrieval_candidate_limit]
+    if settings.retrieval_hybrid_enabled and rerank is None:
+        candidates = await add_keyword_candidates(
+            documents, index, query, candidates, request_id
+        )
     if rerank is not None and candidates:
         filenames = {str(doc["_id"]): doc["filename"] for doc in documents}
         candidates = await rerank(query, candidates, filenames)
