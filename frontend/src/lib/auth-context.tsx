@@ -9,7 +9,13 @@ export type User = { user_id: string; email: string; display_name: string; role:
 type AuthPayload = { access_token: string; token_type: "bearer"; expires_in: number; user: User; csrf_token: string; session_expires_at: string };
 export type AuthStatus = "loading" | "authenticated" | "anonymous" | "unavailable";
 export type ApiError = Error & { status: number; code: string; requestId?: string; retryAfter?: string };
-type ContextValue = { streamChat: (path: string, body: string, signal: AbortSignal, onEvent: (event: ChatEvent) => void) => Promise<void>; user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; download: (path: string, filename: string) => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
+export type UploadOptions = {
+  body: FormData;
+  idempotencyKey: string;
+  signal: AbortSignal;
+  onProgress: (percent: number) => void;
+};
+type ContextValue = { uploadDocument: <T>(options: UploadOptions) => Promise<T>; streamChat: (path: string, body: string, signal: AbortSignal, onEvent: (event: ChatEvent) => void) => Promise<void>; user: User | null; status: AuthStatus; message: string | null; login: (email: string, password: string) => Promise<void>; logout: () => Promise<void>; logoutAll: () => Promise<void>; refresh: () => Promise<void>; download: (path: string, filename: string) => Promise<void>; api: <T>(path: string, init?: RequestInit) => Promise<T> };
 
 const Context = createContext<ContextValue | undefined>(undefined);
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api/v1";
@@ -70,6 +76,61 @@ async function fetchJson<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw new Error("The API is unreachable. Check that the local services are running, then retry.");
   }
   return readJson<T>(response);
+}
+
+function sendDocumentUpload<T>(token: string, options: UploadOptions): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    const cleanup = () => options.signal.removeEventListener("abort", abort);
+    if (options.signal.aborted) {
+      reject(new DOMException("Upload cancelled", "AbortError"));
+      return;
+    }
+    xhr.open("POST", API_BASE.replace(/\/$/, "") + "/documents");
+    xhr.withCredentials = true;
+    xhr.timeout = 120000;
+    xhr.setRequestHeader("Authorization", "Bearer " + token);
+    xhr.setRequestHeader("Idempotency-Key", options.idempotencyKey);
+    xhr.upload.onprogress = event => {
+      if (event.lengthComputable && !options.signal.aborted) {
+        options.onProgress(Math.floor(event.loaded / event.total * 100));
+      }
+    };
+    xhr.onload = () => {
+      cleanup();
+      try {
+        if (xhr.status !== 202 && xhr.status >= 200 && xhr.status < 300) {
+          throw new Error("The server returned an unexpected upload response. Retry to check whether the file was accepted.");
+        }
+        const response = new Response(xhr.responseText, {
+          status: xhr.status,
+          headers: {
+            "X-Request-ID": xhr.getResponseHeader("X-Request-ID") ?? "",
+            "Retry-After": xhr.getResponseHeader("Retry-After") ?? "",
+          },
+        });
+        void readJson<T>(response).then(resolve, reject);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    xhr.onerror = () => {
+      cleanup();
+      reject(new Error("The upload connection failed. Retry to check whether the file was accepted."));
+    };
+    xhr.ontimeout = () => {
+      cleanup();
+      reject(new Error("The upload timed out. Retry to check whether the file was accepted."));
+    };
+    xhr.onabort = () => {
+      cleanup();
+      reject(new DOMException("Upload cancelled", "AbortError"));
+    };
+    options.signal.addEventListener("abort", abort, { once: true });
+    try { xhr.send(options.body); }
+    catch (error) { cleanup(); reject(error); }
+  });
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -166,6 +227,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [refresh, user]);
 
+
+  const uploadDocument = useCallback(async <T,>(options: UploadOptions): Promise<T> => {
+    if (!tokenRef.current || !user) throw new Error("Sign in to continue.");
+    const identity = `${user.user_id}:${user.department_id}:${user.role}`;
+    const stillSame = () => `${userRef.current?.user_id}:${userRef.current?.department_id}:${userRef.current?.role}` === identity;
+    if (expiresAtRef.current - Date.now() < 130000) await refresh();
+    options.signal.throwIfAborted();
+    if (!tokenRef.current || !stillSame()) throw new Error("Your session changed. Please retry.");
+    let result: T;
+    try { result = await sendDocumentUpload<T>(tokenRef.current, options); }
+    catch (error) {
+      if ((error as ApiError).status !== 401) throw error;
+      await refresh();
+      options.signal.throwIfAborted();
+      if (!tokenRef.current || !stillSame()) throw new Error("Your session changed. Please retry.");
+      result = await sendDocumentUpload<T>(tokenRef.current, options);
+    }
+    options.signal.throwIfAborted();
+    if (!stillSame()) throw new Error("Your session changed. Please retry.");
+    return result;
+  }, [refresh, user]);
 
   const streamChat = useCallback(async (path: string, body: string, signal: AbortSignal, onEvent: (event: ChatEvent) => void) => {
     if (!tokenRef.current || !user) throw new Error("Sign in to continue.");
@@ -298,7 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { window.clearInterval(timer); window.removeEventListener("focus", onFocus); };
   }, [revalidate, status]);
 
-  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, download, api, streamChat }), [api, download, login, logout, logoutAll, message, refresh, status, user, streamChat]);
+  const value = useMemo(() => ({ user, status, message, login, logout, logoutAll, refresh, download, api, streamChat, uploadDocument }), [api, download, login, logout, logoutAll, message, refresh, status, user, streamChat, uploadDocument]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

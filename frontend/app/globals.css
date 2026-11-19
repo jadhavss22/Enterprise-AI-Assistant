@@ -126,3 +126,20 @@
   .dash-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dash-panels { grid-template-columns: minmax(0, 1fr); }
 }
+.bulk-upload-list { list-style: none; margin: 0; padding: 0; }
+.bulk-upload-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.bulk-upload-name, .bulk-upload-status { display: grid; gap: 6px; min-width: 0; }
+.bulk-upload-name strong, .bulk-upload-status p { overflow-wrap: anywhere; }
+.bulk-upload-name span, .bulk-upload-status > span { color: var(--muted); font-size: 12px; }
+.bulk-upload-status progress { width: 100%; height: 8px; accent-color: var(--accent); }
+@media (max-width: 680px) {
+  .bulk-upload-row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .bulk-upload-row button { justify-self: start; }
+}
