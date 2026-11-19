@@ -1,3 +1,25 @@
+## Bulk upload review checkpoint - 19 November 2026
+
+Reviewed the multi-file queue, identity/session guards, XHR transfer progress, cancellation, stable upload keys, processing retry reconciliation, polling, permissions, and both upload entry points. Fixed two failure paths. Unexpected empty success responses now reject cleanly and incomplete acceptance IDs cannot leave a file stuck in processing. A rate-limit response pauses the unsent remainder of the batch with per-file retry actions, preserving each file and its original key and visibility.
+
+Fresh checks passed frontend ESLint, TypeScript, and the exact production build in an isolated Linux Node 22 container. Headless Edge against that production build passed mixed file validation, sequential uploads, lost-response upload and reprocess recovery, session refresh, request/rate-limit errors, no further transfers after 429, empty and incomplete acceptance recovery with stable keys, pagination, role controls, both upload entry points, and mobile layout. Browser API responses were synthetic. Manual provider-backed upload acceptance remains pending. The existing Next.js advisory requires its separately recorded dependency review.
+
+User authorized publishing this checkpoint into dev. Work uses codex/bulk-upload-review and a PR so both required GitHub checks can run before merging. This entry precedes Git operations. Next step is manual acceptance with real uploads and the separately tracked dependency upgrade.
+
+## Bulk document upload - 19 November 2026
+
+Implemented multi-file selection in the existing Documents and Manager Uploads entry points on dev. Each file shows byte-transfer progress, server validation wait, ingestion stage and attempt count, terminal status, and its own errors. Uploads run sequentially and capture each file's visibility and stable idempotency key. Failed transfers can be retried with the same key. Failed processing retries use the existing owner/Admin reprocess endpoint and check job history first to recover an accepted retry whose response was lost.
+
+The queue exists in page memory and is cleared on navigation/reload. The UI tells users to keep the page open for batch tracking and retry. Accepted documents continue to use durable backend ingestion jobs. Client checks reject unsupported extensions, empty files, and files larger than 20 MB. The existing API remains authoritative for file content, roles, visibility, duplicate detection, and upload limits. OCR-required failures show the existing error without a processing retry action.
+
+Added authenticated XMLHttpRequest uploads for transfer progress, session refresh on HTTP 401, abort on unmount, a two-minute transfer timeout, and request ID/Retry-After error display. Polling failures remain visible and can recover. The latest document-page refresh callback is used when uploads finish during pagination.
+
+Frontend ESLint, the production build, and TypeScript passed on 18 November. The final headless Edge regression against that production build passed on 19 November using synthetic API responses. Coverage includes mixed valid/invalid batches, sequential transfers, stable-key retry after a lost upload response, processing retry without re-upload, lost retry response recovery, session refresh, rate-limit display, visibility preservation, document pagination during upload, Manager/Employee/Admin controls, both upload entry points, and mobile overflow. Manual production-provider acceptance is pending.
+
+The original implementation was reviewed on 19 November. See the review checkpoint above for the fixes and fresh verification.
+
+Next.js reported a security advisory for the existing installed version during verification. That dependency issue remains open for a separate upgrade review.
+
 ## Hybrid retrieval checkpoint - 18 November 2026
 
 User authorized committing and pushing the reviewed hybrid retrieval feature and runtime fixes to dev. The implementation, evaluation runners and results, regression tests, and review report form this checkpoint. Verification from the review passed 26 retrieval and Chat tests, backend Ruff, focused format checks, and 52 live searches with zero keyword fetch errors. Hybrid retrieval remains disabled by default pending broader relevance evaluation. This entry precedes Git operations; verify the resulting commit and remote hash with Git.

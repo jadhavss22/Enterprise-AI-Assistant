@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { BulkDocumentUpload, stageLabels } from "./bulk-document-upload";
 import { DocumentSearch } from "./document-search";
 import { PlaceholderShell } from "./placeholder-shell";
 import { useAuth, type ApiError } from "../lib/auth-context";
@@ -12,22 +13,11 @@ type DocumentRow = {
   status: "QUEUED" | "PROCESSING" | "READY" | "FAILED" | "OCR_REQUIRED" | "DELETED";
   active_index_version: number | null; chunk_count: number; ingestion_status: string | null; ingestion_stage: string | null; created_at: string;
 };
-type Job = {
-  job_id: string; document_id: string; status: "QUEUED" | "PROCESSING" | "SUCCEEDED" | "FAILED";
-  stage: string | null; attempt_count: number; max_attempts: number;
-  error_code: string | null; error_message: string | null;
-};
-type UploadAccepted = { document_id: string; job_id: string; status: string };
 type Page = { documents: DocumentRow[]; next_cursor: string | null };
 type ShareTarget = { user_id: string; display_name: string; role: string };
 type ShareTargets = { users: ShareTarget[] };
 type Permissions = { visibility: "PRIVATE" | "DEPARTMENT" | "ORGANIZATION"; allowed_user_ids: string[] };
 
-const stageLabels: Record<string, string> = {
-  VALIDATING: "Validating file", EXTRACTING: "Extracting text", CHUNKING: "Preparing text chunks",
-  EMBEDDING: "Creating embeddings", INDEXING: "Adding to search index", VERIFYING: "Verifying index",
-  COMPLETE: "Ready",
-};
 function messageFor(error: unknown): string {
   const value = error as ApiError;
   if (value?.code === "DUPLICATE_DOCUMENT") return "This file already exists in this visibility scope.";
@@ -45,12 +35,7 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
   const [cursorStack, setCursorStack] = useState<(string | null)[]>([null]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const currentCursor = cursorStack[cursorStack.length - 1];
-  const [jobId, setJobId] = useState<string | null>(null);
-  const [job, setJob] = useState<Job | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [visibility, setVisibility] = useState<"PRIVATE" | "DEPARTMENT" | "ORGANIZATION">("DEPARTMENT");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sharingDocument, setSharingDocument] = useState<string | null>(null);
   const [shareTargets, setShareTargets] = useState<ShareTarget[]>([]);
@@ -79,35 +64,9 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
     return () => controller.abort();
   }, [load]);
 
-  useEffect(() => {
-    if (!jobId) return;
-    const currentJobId = jobId;
-    const controller = new AbortController();
-    let cancelled = false;
-    let timer: number | undefined;
-    async function poll() {
-      try {
-        const latest = await api<Job>("/ingestion-jobs/" + encodeURIComponent(currentJobId), { signal: controller.signal });
-        if (cancelled) return;
-        setJob(latest);
-        await load(controller.signal, true);
-        if (cancelled) return;
-        if (latest.status === "SUCCEEDED" || latest.status === "FAILED") {
-          setJobId(null);
-          return;
-        }
-      } catch (cause) {
-        if (!cancelled) setError(messageFor(cause));
-      }
-      if (!cancelled) timer = window.setTimeout(() => void poll(), 3000);
-    }
-    void poll();
-    return () => { cancelled = true; controller.abort(); if (timer) window.clearTimeout(timer); };
-  }, [api, jobId, load]);
-
   const hasPendingDocuments = documents.some((item) => item.status === "QUEUED" || item.status === "PROCESSING" || item.ingestion_status === "QUEUED" || item.ingestion_status === "PROCESSING");
   useEffect(() => {
-    if (jobId || !hasPendingDocuments) return;
+    if (!hasPendingDocuments) return;
     const controller = new AbortController();
     let timer: number | undefined;
     async function refreshPending() {
@@ -116,28 +75,12 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
     }
     timer = window.setTimeout(() => void refreshPending(), 3000);
     return () => { controller.abort(); if (timer) window.clearTimeout(timer); };
-  }, [hasPendingDocuments, jobId, load]);
+  }, [hasPendingDocuments, load]);
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!file) { setError("Choose a PDF, DOCX, or TXT file first."); return; }
-    setSaving(true); setError(null); setJob(null);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("visibility", visibility);
-      const accepted = await api<UploadAccepted>("/documents", {
-        method: "POST", body: form, headers: { "Idempotency-Key": crypto.randomUUID() },
-      });
-      setFile(null);
-      const input = document.getElementById("document-file") as HTMLInputElement | null;
-      if (input) input.value = "";
-      setJobId(accepted.job_id);
-      if (currentCursor) setCursorStack([null]);
-      else await load();
-    } catch (cause) { setError(messageFor(cause)); }
-    finally { setSaving(false); }
-  }
+  const uploadActivity = useCallback(() => {
+    if (currentCursor) setCursorStack([null]);
+    else void load(undefined, true);
+  }, [currentCursor, load]);
 
   async function openAccess(documentId: string) {
     setError(null);
@@ -173,34 +116,18 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
   const canUpload = user?.role === "manager" || user?.role === "admin";
   return <PlaceholderShell title={uploadOnly ? "Manager Uploads" : "Documents"} roles={uploadOnly ? ["manager", "admin"] : undefined}>
     <div className="page-wrap documents-page">
-      <div className="page-heading"><div><p className="eyebrow">KNOWLEDGE LIBRARY</p><h1>{uploadOnly ? "Upload documents" : "Documents"}</h1><p>{uploadOnly ? "Upload a source file and follow its processing stages." : "Browse files your account is allowed to access."}</p></div>
+      <div className="page-heading"><div><p className="eyebrow">KNOWLEDGE LIBRARY</p><h1>{uploadOnly ? "Upload documents" : "Documents"}</h1><p>{uploadOnly ? "Upload source files and follow each file's progress." : "Browse files your account is allowed to access."}</p></div>
         {!uploadOnly && canUpload && <Link className="button primary" href="/manager/upload">Upload document</Link>}
       </div>
 
       {!uploadOnly && <DocumentSearch key={`${user?.user_id}:${user?.department_id}:${user?.role}`} />}
 
-      {canUpload && <section className="panel document-upload">
-        <div><h2>{uploadOnly ? "New upload" : "Add a document"}</h2><p className="muted-note">PDF, DOCX, or TXT · Maximum 20 MB</p></div>
-        <form className="document-upload-form" onSubmit={(event) => void submit(event)}>
-          <label htmlFor="document-file">Choose file</label>
-          <input id="document-file" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
-          <label htmlFor="document-visibility">Visibility</label>
-          <select id="document-visibility" value={visibility} onChange={(event) => setVisibility(event.target.value as typeof visibility)}>
-            <option value="PRIVATE">Private · you (add colleagues after upload)</option>
-            <option value="DEPARTMENT">Department · your department</option>
-            {user?.role === "admin" && <option value="ORGANIZATION">Organization · everyone</option>}
-          </select>
-          <p className="muted-note">Only Admins can publish organization-wide documents. Files are checked before processing.</p>
-          <button className="button primary" type="submit" disabled={saving || !file}>{saving ? "Uploading…" : "Upload and process"}</button>
-        </form>
-      </section>}
+      {canUpload && <BulkDocumentUpload
+        key={`upload:${user?.user_id}:${user?.department_id}:${user?.role}`}
+        onActivity={uploadActivity}
+      />}
 
       {error && <p className="inline-error" role="alert">{error}</p>}
-      {job && <section className={"panel ingestion-status " + job.status.toLowerCase()} role="status">
-        <strong>{job.status === "SUCCEEDED" ? "Processing complete" : job.status === "FAILED" ? "Processing needs attention" : stageLabels[job.stage ?? ""] ?? "Processing document"}</strong>
-        <p>{job.status === "FAILED" ? job.error_message ?? "The document could not be processed." : job.status === "SUCCEEDED" ? "The document is ready for the next project phase." : "Stage: " + (stageLabels[job.stage ?? ""] ?? "Queued") + ". Attempt " + job.attempt_count + " of " + job.max_attempts + "."}</p>
-      </section>}
-
       <section className="panel document-list">
         <div className="section-heading"><div><h2>Accessible documents</h2><p className="muted-note">Access is checked by the API for each request.</p></div><button className="button subtle" onClick={() => void load()} disabled={loading}>Refresh</button></div>
         {loading ? <p className="table-message">Loading documents…</p> : documents.length === 0 ? <div className="empty-state"><strong>No accessible documents yet</strong><p>When documents are uploaded and authorized for your account, they appear here.</p></div> :
@@ -213,8 +140,8 @@ export function DocumentWorkspace({ uploadOnly = false }: { uploadOnly?: boolean
         <nav className="table-footer" aria-label="Document pages">
           <span aria-live="polite">Page {cursorStack.length}</span>
           <div className="button-row">
-            <button className="button subtle" aria-label="Previous documents" disabled={loading || saving || cursorStack.length === 1} onClick={() => { setSharingDocument(null); setCursorStack((stack) => stack.slice(0, -1)); }}>Previous</button>
-            <button className="button subtle" aria-label="Next documents" disabled={loading || saving || !nextCursor} onClick={() => { if (nextCursor) { setSharingDocument(null); setCursorStack((stack) => [...stack, nextCursor]); } }}>Next</button>
+            <button className="button subtle" aria-label="Previous documents" disabled={loading || cursorStack.length === 1} onClick={() => { setSharingDocument(null); setCursorStack((stack) => stack.slice(0, -1)); }}>Previous</button>
+            <button className="button subtle" aria-label="Next documents" disabled={loading || !nextCursor} onClick={() => { if (nextCursor) { setSharingDocument(null); setCursorStack((stack) => [...stack, nextCursor]); } }}>Next</button>
           </div>
         </nav>
       </section>
