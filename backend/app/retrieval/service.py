@@ -12,7 +12,7 @@ from app.config import settings
 from app.documents.access import visible_documents_query
 from app.documents.service import audit_admin_private_access
 from app.documents.validation import fail
-from app.retrieval import lexical
+from app.retrieval import lexical, quality
 from app.retrieval.providers import query_embedding, search_namespaces
 
 logger = logging.getLogger(__name__)
@@ -131,7 +131,34 @@ async def retrieve(db, actor, query, request_id, *, rerank=None):
         raise fail(503, "SEARCH_BUSY", "Search is busy; retry shortly") from None
     started = time.monotonic()
     try:
-        return await _retrieve(db, actor, query, request_id, started, rerank=rerank)
+        original = await _retrieve(db, actor, query, request_id, started, rerank=rerank)
+        if (
+            not settings.retrieval_query_rewrite_enabled
+            or rerank is not None
+            or original["status"] != "NO_RELEVANT_MATCHES"
+        ):
+            return original
+        rewritten = await quality.rewrite_search_query(query, request_id)
+        if rewritten is None:
+            await revalidate_actor(db, actor)
+            return original
+        current = await revalidate_actor(db, actor)
+        try:
+            async with asyncio.timeout(settings.retrieval_query_retry_timeout_seconds):
+                return await _retrieve(
+                    db, current, rewritten, request_id, started, rerank=rerank
+                )
+        except TimeoutError:
+            logger.info("retrieval.query_retry_timeout request_id=%s", request_id)
+        except HTTPException as exc:
+            code = exc.detail.get("code") if isinstance(exc.detail, dict) else None
+            if exc.status_code < 500 and code != "QUERY_TOO_LONG":
+                raise
+            logger.info(
+                "retrieval.query_retry_fallback code=%s request_id=%s", code, request_id
+            )
+        await revalidate_actor(db, actor)
+        return original
     finally:
         _search_slots.release()
 
@@ -187,6 +214,11 @@ async def _retrieve(db, actor, query, request_id, started, *, rerank=None):
     if rerank is not None and candidates:
         filenames = {str(doc["_id"]): doc["filename"] for doc in documents}
         candidates = await rerank(query, candidates, filenames)
+    elif settings.retrieval_rerank_enabled and len(candidates) > 1:
+        filenames = {str(doc["_id"]): doc["filename"] for doc in documents}
+        candidates = await quality.rerank_candidates(
+            query, candidates, filenames, request_id
+        )
     current = await revalidate_actor(db, actor)
     latest_query = searchable_query(current)
     latest_query["_id"] = {"$in": [d["_id"] for d in documents]}
