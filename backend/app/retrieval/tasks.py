@@ -1,8 +1,19 @@
 import math
 
 from app.ingestion.providers import ProviderConfigurationError
+from app.retrieval.reranker import score_pairs
 from app.retrieval.runtime import ready_provider
 from app.workers.celery_app import celery_app
+
+
+@celery_app.task(
+    name="app.retrieval.tasks.rerank_passages",
+    expires=20,
+    result_expires=60,
+    resultrepr_maxsize=0,
+)
+def rerank_passages(pairs):
+    return score_pairs(pairs)
 
 
 @celery_app.task(

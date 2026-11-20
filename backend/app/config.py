@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     retrieval_candidate_limit: int = Field(default=20, ge=5, le=100)
     retrieval_result_limit: int = Field(default=5, ge=1, le=5)
     retrieval_hybrid_enabled: bool = False
+    retrieval_rerank_enabled: bool = False
+    retrieval_rerank_timeout_seconds: float = Field(default=8, gt=0, le=20)
+    retrieval_query_rewrite_enabled: bool = False
+    retrieval_rewrite_timeout_seconds: float = Field(default=5, gt=0, le=15)
+    retrieval_query_retry_timeout_seconds: float = Field(default=10, gt=0, le=30)
     retrieval_min_score: float = Field(default=0.25, ge=-1, le=1)
     retrieval_search_concurrency: int = Field(default=4, ge=1, le=8)
     retrieval_embedding_timeout_seconds: int = Field(default=20, ge=1, le=30)

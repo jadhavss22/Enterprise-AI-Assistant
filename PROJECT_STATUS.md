@@ -1,3 +1,25 @@
+## Retrieval quality review - 20 November 2026
+
+Reviewed optional reranking and query rewriting, worker startup, pinned cache-only model loading, input/output bounds, provider-pool lifetime, cancellation, retry fallback, current ACL/version rechecks, and evaluation scripts. Two rewrite guard gaps were fixed. Numeric/identifier token sets must now match exactly, which rejects invented numbers and identifiers. Common negations are checked in both directions and contracted forms, including curly apostrophes and cannot, are recognized. Seven new cases cover these constraints. The guards protect specific literals and require evaluation for broader intent preservation.
+
+Fresh verification: 201 backend tests passed in 291.84 seconds. Full backend Ruff, focused formatting, default-settings checks, evaluation CLI help, and whitespace checks passed. The initial focused run had one pytest temporary-directory access error. The complete rerun used normal temporary-directory access and local MongoDB, Redis, and Azurite. Provider/model behavior in the new quality tests uses doubles. No new live model-backed quality comparison was run.
+
+Both features remain disabled by default. Provision and benchmark the reranker and compare baseline/reranking/rewriting/combined on labeled data before enabling. Inference shares the embedding worker, so worker contention remains part of that evaluation. User authorized committing and publishing the checkpoint into dev through a feature PR and the required GitHub checks. This entry precedes Git operations.
+
+## Reranking and query rewriting checkpoint - 20 November 2026
+
+Implemented opt-in quality stages in shared retrieval for Document Search and Chat on dev. Reranking uses the existing pinned MS MARCO MiniLM cross-encoder on the Celery execution worker. Startup warms a locally provisioned model cache, and queries cannot trigger downloads or initialization. Validated candidates are reordered without lowering the semantic cutoff or filtering on model logits. Optional hybrid results can also be reranked. Existing experiment callbacks retain their separate behavior.
+
+After a successful search returns no relevant matches, optional Gemini rewriting may produce one alternative question and make one bounded retrieval retry. Literal identifiers, numbers, quoted terms, and explicit negation are guarded. Existing matches and inaccessible-document scopes bypass the stage. Chat answers and saved questions retain the user's original intent while the alternative phrasing is used only for retrieval. The existing history-based follow-up resolution continues to run.
+
+Defaults remain disabled through RETRIEVAL_RERANK_ENABLED and RETRIEVAL_QUERY_REWRITE_ENABLED. Reranking has an eight-second budget with a separate bounded API provider pool and ephemeral, redacted task transport. Inference shares the existing Celery worker, so worker contention requires evaluation. Rewrite generation has a five-second budget and its retrieval retry has a ten-second budget. Optional failures preserve the original candidate order or empty result. Authentication failures propagate, and final source permissions and active versions are rechecked.
+
+Added explicit reranker model provisioning, setup instructions in docs/retrieval-quality.md, and a four-profile synthetic evaluation runner. The runner records optional-stage execution counts and fails if an enabled model stage is never exercised. Live model-backed comparison has not run for this implementation. Provision the pinned cache and evaluate on labeled questions before enabling either stage. The shared path performs at most one alternate search. Review confirmed that dev has no chat-only retry implementation, and Chat makes one shared retrieval call. The separate earlier prototype must not be stacked onto this path.
+
+Verification on 19 November passed all 21 new quality-stage checks and 26 existing retrieval, hybrid, hardening, fallback-experiment, and Chat checks against the local MongoDB replica set and Redis with model/provider doubles. The first integrated attempts encountered stopped services and two incorrect fixture assumptions, which were resolved before the passing checks. The new evaluation CLI imports and displays help successfully. Fresh checks on 20 November passed backend Ruff, focused formatting, and Git whitespace checks. No live quality improvement is claimed.
+
+Review and verification are recorded in the newer entry above. The user authorized publication into dev through required CI.
+
 ## Bulk upload review checkpoint - 19 November 2026
 
 Reviewed the multi-file queue, identity/session guards, XHR transfer progress, cancellation, stable upload keys, processing retry reconciliation, polling, permissions, and both upload entry points. Fixed two failure paths. Unexpected empty success responses now reject cleanly and incomplete acceptance IDs cannot leave a file stuck in processing. A rate-limit response pauses the unsent remainder of the batch with per-file retry actions, preserving each file and its original key and visibility.
