@@ -1,3 +1,25 @@
+## OCR review checkpoint - 23 November 2026
+
+Reviewed native/scanned page selection, process resource limits, timeout/exit cleanup, extraction cancellation, progress metadata, retries, prior-version preservation, citation pages, Docker deployment, CI engine requirements, and frontend progress.
+
+Fixed three failure paths. The parent now kills the remaining process group and reaps the helper on every exit, including abnormal helper termination. A page that consumes the remaining document budget is classified as OCR_DOCUMENT_TIMEOUT so it does not consume repeated automatic attempts. Lease-loss and document-deletion signals raised by OCR progress retain their cancellation meaning through extraction instead of becoming parse failures. Five new regression cases cover these behaviors.
+
+Fresh verification: 225 backend tests passed in 429.19 seconds. Frontend lint, TypeScript, isolated Linux production build, and the headless Edge bulk-upload regression with synthetic OCR progress passed. Backend Ruff, focused formatting, and whitespace checks passed. OCR runs in Linux with the real Tesseract engine. The integration path uses real MongoDB/Redis and provider doubles, and the full suite includes the Azurite transport check.
+
+The user authorized publishing this reviewed checkpoint into dev through a feature PR and both required CI jobs. This entry precedes Git operations. Representative company-scan and live cloud-provider acceptance remain pending. Deployment requires rebuilding and restarting the backend services to install the OCR engine. The existing Next.js dependency advisory remains recorded separately.
+
+## Printed English PDF OCR - 21 November 2026
+
+Implemented local Tesseract OCR in the Linux ingestion worker on dev. Native PDF extraction selects image-heavy pages with little text and nonempty pages with no native text. Mixed pages retain native text, and recognized text enters the existing page-specific chunking and indexing pipeline. Original one-based PDF pages remain in search results, Chat citation events, and saved conversation history.
+
+Added OCR job progress and page counters to the upload queue and Admin ingestion jobs. Defaults allow 50 scanned pages, 20 seconds per page, 120 seconds per document OCR stage, eight million render pixels, and 768 MiB per page subprocess. Fresh Linux process groups bound memory, CPU, output, and lifetime; timeout cleanup kills and reaps the group. Errors expose fixed messages. Transient engine and per-page timeout failures use the existing three-attempt retry budget. Unreadable and over-budget scans fail explicitly and preserve any prior active version. Processing retry is available after OCR worker configuration is corrected.
+
+Verification: All 220 backend tests passed in 317.77 seconds on 21 November with real Linux Tesseract, MongoDB, Redis, and the local Azurite regression enabled. New coverage includes synthetic scanned and mixed PDFs, all four right-angle rotations, unreadable and blank scans, smaller render budgets, confidence rejection, deadlines, process-group timeout cleanup, retries, prior-version preservation, and lease fencing. The upload-to-search-and-Chat test uses actual Tesseract and real MongoDB/Redis with blob, embedding, vector, and answer-provider doubles. No live cloud-provider or representative company-scan acceptance is claimed. The first full run had an incorrect citation-event assertion and a container loopback routing problem for the existing Azurite test; both test issues were corrected before final verification.
+
+Backend Ruff, focused formatting, and Git whitespace checks passed. Frontend ESLint, production build, TypeScript, and the headless Edge bulk-upload regression passed on 21 November, including OCR page progress. The existing Next.js dependency security advisory remains a separate open upgrade review.
+
+Deployment requires rebuilding and restarting the backend images to install Tesseract, English data, and orientation data. See docs/ocr-ingestion.md for settings, deployment, and verification limits. CI installs the OCR engine and requires real OCR tests. The reviewed fixes and fresh verification are recorded above. The user authorized publication; representative printed-English scan acceptance remains part of rollout. Hybrid retrieval, reranking, and query rewriting remain disabled by default pending their separate live quality evaluation.
+
 ## Retrieval quality review - 20 November 2026
 
 Reviewed optional reranking and query rewriting, worker startup, pinned cache-only model loading, input/output bounds, provider-pool lifetime, cancellation, retry fallback, current ACL/version rechecks, and evaluation scripts. Two rewrite guard gaps were fixed. Numeric/identifier token sets must now match exactly, which rejects invented numbers and identifiers. Common negations are checked in both directions and contracted forms, including curly apostrophes and cannot, are recognized. Seven new cases cover these constraints. The guards protect specific literals and require evaluation for broader intent preservation.

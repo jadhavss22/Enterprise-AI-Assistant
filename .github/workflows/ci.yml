@@ -23,6 +23,7 @@ jobs:
       AUTH_TEST_MONGODB_URL: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
       AUTH_TEST_REDIS_URL: redis://127.0.0.1:6379/0
       RUN_LOCAL_AZURITE_TEST: "1"
+      RUN_OCR_TESTS: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,6 +39,10 @@ jobs:
       - name: Lint backend
         working-directory: backend
         run: uv run --no-sync ruff check .
+      - name: Install English OCR engine
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd
       - name: Start test dependencies
         run: |
           cp .env.example .env

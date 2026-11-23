@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     document_chunk_size: int = Field(default=200, ge=1, le=2000)
     document_chunk_overlap: int = Field(default=40, ge=0, le=1999)
     document_upload_rate_limit: int = Field(default=20, ge=1, le=1000)
+    document_ocr_enabled: bool = True
+    document_ocr_max_pages: int = Field(default=50, ge=1, le=200)
+    document_ocr_page_timeout_seconds: int = Field(default=20, ge=1, le=60)
+    document_ocr_timeout_seconds: int = Field(default=120, ge=1, le=600)
+    document_ocr_max_pixels: int = Field(default=8_000_000, ge=1_000_000, le=16_000_000)
+    document_ocr_memory_mb: int = Field(default=768, ge=256, le=2048)
     retrieval_max_documents: int = Field(default=25, ge=1, le=100)
     retrieval_candidate_limit: int = Field(default=20, ge=5, le=100)
     retrieval_result_limit: int = Field(default=5, ge=1, le=5)

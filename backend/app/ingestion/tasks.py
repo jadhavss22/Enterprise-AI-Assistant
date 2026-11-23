@@ -141,6 +141,35 @@ def _stage(db, job, stage):
         raise RuntimeError("INGESTION_LEASE_LOST")
 
 
+def _ocr_progress(db, job, page, completed, total):
+    _renew_lease(db, job)
+    if (
+        db.documents.find_one(
+            {"_id": job["document_id"], "deleted_at": {"$exists": False}}, {"_id": 1}
+        )
+        is None
+    ):
+        raise RuntimeError("DOCUMENT_STATE_CHANGED")
+    updated = db.ingestion_jobs.update_one(
+        {
+            "_id": job["_id"],
+            "fencing_token": job["fencing_token"],
+            "status": "PROCESSING",
+        },
+        {
+            "$set": {
+                "stage": IngestionStage.OCR.value,
+                "ocr_current_page": page,
+                "ocr_pages_completed": completed,
+                "ocr_pages_total": total,
+                "updated_at": datetime.now(UTC),
+            }
+        },
+    )
+    if updated.matched_count != 1:
+        raise RuntimeError("INGESTION_LEASE_LOST")
+
+
 def _embed_chunks(db, job, chunks, provider):
     vectors = []
     for start in range(0, len(chunks), provider.batch_size):
@@ -330,6 +359,11 @@ def process_ingestion_job(self, job_id: str):
                     "updated_at": now,
                 },
                 "$inc": {"attempt_count": 1, "fencing_token": 1},
+                "$unset": {
+                    "ocr_current_page": "",
+                    "ocr_pages_completed": "",
+                    "ocr_pages_total": "",
+                },
             },
             return_document=ReturnDocument.AFTER,
         )
@@ -374,7 +408,13 @@ def process_ingestion_job(self, job_id: str):
             )
         finally:
             service.close()
-        pages = extract_pages(document["filename"], content)
+        pages = extract_pages(
+            document["filename"],
+            content,
+            ocr_progress=lambda page, completed, total: _ocr_progress(
+                db, job, page, completed, total
+            ),
+        )
         _stage(db, job, IngestionStage.CHUNKING)
         provider = embedding_provider()
         chunks = chunk_pages(
@@ -456,6 +496,13 @@ def process_ingestion_job(self, job_id: str):
             "INGESTION_LEASE_LOST",
             "DOCUMENT_STATE_CHANGED",
             "OCR_REQUIRED",
+            "OCR_UNAVAILABLE",
+            "OCR_TIMEOUT",
+            "OCR_DOCUMENT_TIMEOUT",
+            "OCR_RESOURCE_LIMIT",
+            "OCR_UNREADABLE",
+            "OCR_FAILED",
+            "OCR_PAGE_LIMIT",
             "PDF_ENCRYPTED",
             "PDF_PAGE_LIMIT",
             "DOCUMENT_PARSE_FAILED",
@@ -476,10 +523,15 @@ def process_ingestion_job(self, job_id: str):
             "CHUNK_SIZE_EXCEEDS_EMBEDDING_LIMIT",
             "DOCUMENT_TEXT_EMPTY",
             "OCR_REQUIRED",
+            "OCR_DOCUMENT_TIMEOUT",
+            "OCR_RESOURCE_LIMIT",
+            "OCR_UNREADABLE",
+            "OCR_PAGE_LIMIT",
             "PDF_ENCRYPTED",
             "PDF_PAGE_LIMIT",
             "DOCUMENT_PARSE_FAILED",
             "FILE_TYPE_UNSUPPORTED",
+            "EXTRACTED_TEXT_LIMIT",
         }
         if job and not deterministic and job["attempt_count"] < job["max_attempts"]:
             delay = 2 ** job["attempt_count"]
@@ -501,11 +553,19 @@ def process_ingestion_job(self, job_id: str):
             )
             raise self.retry(exc=error, countdown=delay)
         safe_message = {
+            "DOCUMENT_TEXT_EMPTY": "No readable text was found in the document.",
             "INDEX_PROVIDER_UNCONFIGURED": "Configure Azure OpenAI embeddings and the Pinecone index to finish indexing.",
             "EMBEDDING_DIMENSION_MISMATCH": "The embedding dimensions do not match the configured Pinecone index.",
             "LOCAL_EMBEDDING_DIMENSION_MISMATCH": "The local embedding model did not produce the configured 384 dimensions.",
             "CHUNK_SIZE_EXCEEDS_EMBEDDING_LIMIT": "The configured chunk size exceeds the selected embedding model input limit.",
-            "OCR_REQUIRED": "This PDF has no extractable text; scanned-document OCR is not available.",
+            "OCR_REQUIRED": "This PDF needs OCR. Enable OCR on the worker and reprocess it.",
+            "OCR_UNAVAILABLE": "The English OCR engine is unavailable. Restart the updated worker and retry.",
+            "OCR_TIMEOUT": "OCR exceeded the per-page time limit. Retry or upload a clearer scan.",
+            "OCR_DOCUMENT_TIMEOUT": "OCR exceeded the document time limit. Split the PDF into smaller files.",
+            "OCR_RESOURCE_LIMIT": "The scanned page exceeds the OCR processing limits.",
+            "OCR_UNREADABLE": "A scanned page has no reliably readable printed English text. Upload a clearer scan.",
+            "OCR_FAILED": "The OCR engine could not process this page. Retry the job.",
+            "OCR_PAGE_LIMIT": "This PDF has too many scanned pages. Split it into smaller files.",
         }.get(code, "The document could not be processed safely.")
         now = datetime.now(UTC)
         if job:

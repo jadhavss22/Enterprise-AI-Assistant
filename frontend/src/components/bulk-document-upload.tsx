@@ -10,6 +10,7 @@ type Accepted = { document_id: string; job_id: string };
 type Job = {
   job_id: string; document_id: string; status: "QUEUED" | "PROCESSING" | "SUCCEEDED" | "FAILED";
   stage: string | null; attempt_count: number; max_attempts: number;
+  ocr_current_page?: number | null; ocr_pages_completed?: number | null; ocr_pages_total?: number | null;
   error_code: string | null; error_message: string | null;
 };
 type UploadRow = {
@@ -22,6 +23,7 @@ export const stageLabels: Record<string, string> = {
   VALIDATING: "Validating file", EXTRACTING: "Extracting text", CHUNKING: "Preparing text chunks",
   EMBEDDING: "Creating embeddings", INDEXING: "Adding to search index", VERIFYING: "Verifying index",
   COMPLETE: "Ready",
+  OCR: "Reading scanned pages",
 };
 
 function errorMessage(cause: unknown): string {
@@ -273,11 +275,13 @@ export function BulkDocumentUpload({ onActivity }: { onActivity: () => void }) {
             {row.phase === "uploading" && <progress max={100} value={row.percent} aria-label={`Uploading ${row.filename}`} />}
             {row.phase === "processing" && <progress aria-label={`Processing ${row.filename}`} />}
             {row.job && row.phase === "processing" && <span>Attempt {row.job.attempt_count} of {row.job.max_attempts}</span>}
+            {row.job?.stage === "OCR" &&
+              <span>PDF page {row.job.ocr_current_page} · {row.job.ocr_pages_completed ?? 0} of {row.job.ocr_pages_total} scanned pages read</span>}
             {row.error && <p className="inline-error" role="alert">{row.error}</p>}
           </div>
           {row.phase === "upload_failed" && <button className="button subtle small-button" type="button"
             disabled={uploading} onClick={() => void startTransfers([row])}>Retry upload</button>}
-          {row.phase === "processing_failed" && row.job?.error_code !== "OCR_REQUIRED" &&
+          {row.phase === "processing_failed" &&
             <button className="button subtle small-button" type="button"
               disabled={row.busy} onClick={() => void retryProcessing(row)}>
               {row.busy ? "Retrying…" : "Retry processing"}
