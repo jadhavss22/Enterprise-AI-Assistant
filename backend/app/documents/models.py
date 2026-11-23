@@ -26,6 +26,7 @@ class IngestionStatus(StrEnum):
 class IngestionStage(StrEnum):
     VALIDATING = "VALIDATING"
     EXTRACTING = "EXTRACTING"
+    OCR = "OCR"
     CHUNKING = "CHUNKING"
     EMBEDDING = "EMBEDDING"
     INDEXING = "INDEXING"

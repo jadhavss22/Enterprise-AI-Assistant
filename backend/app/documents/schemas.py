@@ -46,6 +46,9 @@ class IngestionJobPublic(BaseModel):
     document_id: str
     status: IngestionStatus
     stage: IngestionStage | None = None
+    ocr_current_page: int | None = None
+    ocr_pages_completed: int | None = None
+    ocr_pages_total: int | None = None
     attempt_count: int
     max_attempts: int
     error_code: str | None = None

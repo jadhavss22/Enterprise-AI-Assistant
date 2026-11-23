@@ -21,6 +21,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || "playwright")
   let processingRetries = 0;
   let refreshes = 0;
   let transientStatusFailure = true;
+  let ocrStatusShown = false;
   const user = () => ({
     user_id: "a".repeat(24), display_name: "Synthetic Manager", email: "synthetic@example.com",
     role, status: "active", department_id: "b".repeat(24),
@@ -107,6 +108,12 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || "playwright")
         transientStatusFailure = false;
         status = 503;
         data = { error: { code: "UNAVAILABLE", message: "Synthetic status interruption" } };
+      } else if (id === "1".padStart(24, "0") && !ocrStatusShown) {
+        ocrStatusShown = true;
+        data = {
+          ...jobs.get(id), status: "PROCESSING", stage: "OCR",
+          ocr_current_page: 2, ocr_pages_completed: 0, ocr_pages_total: 1,
+        };
       } else data = jobs.get(id);
     } else if (/^\/documents\/[^/]+\/jobs$/.test(path)) {
       const id = path.split("/")[2];
@@ -155,6 +162,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || "playwright")
     const row = name => page.getByRole("listitem").filter({ has: page.getByText(name, { exact: true }) });
     await row("retry.txt").getByRole("button", { name: "Retry upload", exact: true }).waitFor();
     await row("process.txt").getByRole("button", { name: "Retry processing", exact: true }).waitFor();
+    await row("alpha.txt").getByText("PDF page 2 · 0 of 1 scanned pages read", { exact: true }).waitFor();
     await row("alpha.txt").getByText("Ready for search", { exact: true }).waitFor();
     await page.getByRole("navigation", { name: "Document pages" }).getByText("Page 1", { exact: true }).waitFor();
     assert.equal(accepted.size, 3);
