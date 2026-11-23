@@ -6,6 +6,8 @@ Fixed three failure paths. The parent now kills the remaining process group and 
 
 Fresh verification: 225 backend tests passed in 429.19 seconds. Frontend lint, TypeScript, isolated Linux production build, and the headless Edge bulk-upload regression with synthetic OCR progress passed. Backend Ruff, focused formatting, and whitespace checks passed. OCR runs in Linux with the real Tesseract engine. The integration path uses real MongoDB/Redis and provider doubles, and the full suite includes the Azurite transport check.
 
+The first hosted run timed out in all nine real OCR cases. A synthetic helper diagnostic and the full hosted rerun passed all 225 tests in 90.47 seconds with unchanged OCR limits. The failure was not reproduced using the same managed Python version locally. Temporary diagnostic instrumentation was removed for a final standard CI run. Representative deployment timing remains part of rollout acceptance.
+
 The user authorized publishing this reviewed checkpoint into dev through a feature PR and both required CI jobs. This entry precedes Git operations. Representative company-scan and live cloud-provider acceptance remain pending. Deployment requires rebuilding and restarting the backend services to install the OCR engine. The existing Next.js dependency advisory remains recorded separately.
 
 ## Printed English PDF OCR - 21 November 2026
