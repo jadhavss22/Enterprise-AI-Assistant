@@ -43,6 +43,31 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-eng tesseract-ocr-osd
+      - name: Diagnose OCR helper startup
+        working-directory: backend
+        run: |
+          uv run --no-sync python - <<'PY'
+          import sys
+          import tempfile
+          import pytest
+          from app.ingestion import ocr
+
+          original = ocr.subprocess.Popen
+          logs = []
+          def launch(args, **kwargs):
+              log = tempfile.TemporaryFile()
+              logs.append(log)
+              kwargs["stderr"] = log
+              script = "import faulthandler,runpy,sys; faulthandler.dump_traceback_later(5, repeat=True); path=sys.argv.pop(1); runpy.run_path(path, run_name='__main__')"
+              return original([args[0], "-c", script, *args[1:]], **kwargs)
+          ocr.subprocess.Popen = launch
+          status = pytest.main(["tests/test_ocr.py", "-k", "real_blank", "-q", "-s", "-p", "no:cacheprovider"])
+          for log in logs:
+              log.seek(0)
+              print(log.read(16000).decode("utf-8", errors="replace"))
+              log.close()
+          raise SystemExit(status)
+          PY
       - name: Start test dependencies
         run: |
           cp .env.example .env
