@@ -45,3 +45,6 @@ The test_ocr module generates synthetic PDFs in memory and covers native text, s
 The test_ocr_ingestion module exercises upload, actual OCR, ingestion, vector metadata, authenticated search, and Chat page citations against disposable MongoDB state. Embedding, vector storage, blob storage, and answer generation use doubles. Other tests check retry exhaustion, active-version preservation, and lease fencing.
 
 CI installs the OCR packages and sets RUN_OCR_TESTS=1, which requires the real Linux OCR fixtures to run. Native development environments without that engine can run the other tests. Manual acceptance with representative real company scans remains part of rollout.
+
+
+Backend CI targets Ubuntu 24.04 with real OCR required. The Debian-based backend image is the tested deployment runtime. Ubuntu 26.04 hosted images produced different OCR behavior across providers during review, so validate a new OS/runtime before adopting it. The per-page and per-document processing limits apply throughout.
