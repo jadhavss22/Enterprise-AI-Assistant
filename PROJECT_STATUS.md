@@ -1,3 +1,21 @@
+## Hybrid evaluation review - 24 November 2026
+
+Reviewed labels, paired measurement, denominators, gates, session refresh, synthetic provisioning, cancellation, output safety, and cleanup. Fixed predictable temporary-file collisions, added exclusive output-journal ownership, and made cancellation drain admitted synchronous vector writes before cleanup so late writes cannot recreate a deleted namespace. New regression cases cover file preservation, concurrent journal ownership, and single/repeated cancellation. Future journals include the configured Pinecone index name. Dataset fingerprints now normalize newlines so Git checkout does not invalidate the evidence; artifacts retain their original raw-file fingerprints.
+
+Fresh verification: 18 evaluation/lexical/fallback tests passed in 6.87 seconds, including newline-stable dataset fingerprints. Ruff, focused formatting, whitespace checks, and evaluation CLI help passed. An offline audit of both saved runs checked the canonical dataset hash, every label and case/round combination, recalculated summaries/categories/regressions/gates/decisions, and recorded cleanup acknowledgments. No live benchmark or cloud writes were repeated by this review.
+
+The recorded results and decision remain unchanged. Keep hybrid disabled: irrelevant passage counts and p95 latency failed the declared gates. Representative company labels, repeated timings, and load acceptance remain pending. User authorized publication into dev through a feature PR and both required CI checks. This entry precedes Git operations.
+
+## Expanded hybrid retrieval evaluation - 24 November 2026
+
+Added a pre-labeled 96-question synthetic evaluation over 12 policies: 12 exact identifiers, 12 literal phrases, 24 paraphrases, and 48 unsupported questions including similar identifiers and absent rules. The paired live runner uses actual execution-worker embeddings and Pinecone, preserves existing documents, journals disposable resource IDs, alternates mode order, measures usage/errors/timeouts, and cleans its generated namespaces and local test state. Reranking and rewriting are disabled for isolation. The canonical labels ship with backend test fixtures.
+
+The corrected full run completed all 192 measured requests successfully. Semantic/hybrid document recall@5 was 91.67%/97.92%; unsupported questions with hits were 35/48 and 35/48. Irrelevant passages totaled 191 and 195. Median latency was 2.730 s/3.503 s, with p95 3.653 s/4.999 s. Hybrid incurred 1152 keyword fetch calls, 1152 requested records, and 1152 reported fetch read units; it recorded 0 keyword timeout requests and 0 total keyword-error requests. Usage covers keyword fetches only. All generated resource cleanup was acknowledged.
+
+Decision: keep hybrid disabled. Failed gates: irrelevant_passages_do_not_increase, p95_within_20_percent_plus_250ms. There were 0 per-question recall losses and 0 newly introduced unsupported-question hits. The decision report records increased-noise cases and unresolved precision/latency blockers. No production retrieval correctness fix or live organization-data acceptance is claimed. Next work is keyword precision and request-time fetch cost, followed by this fixed regression set, representative company labels, repeat timings, and load acceptance.
+
+Fixed benchmark denominator handling, proactive CSRF-protected session refresh, and output/journal safeguards. The first attempt had 23 pairs of authentication errors after token expiry and is retained separately; the final full run used session refresh. Fresh verification passed 26 focused tests and backend Ruff; focused format and whitespace checks passed. See docs/hybrid-evaluation.md, docs/hybrid-evaluation-decision-2026-11-24.md, and evaluation/retrieval-hybrid-expanded-v1-results.json. The implementation was local on dev at this checkpoint. The user subsequently authorized review, fixes, and publication; see the review entry above.
+
 ## OCR review checkpoint - 23 November 2026
 
 Reviewed native/scanned page selection, process resource limits, timeout/exit cleanup, extraction cancellation, progress metadata, retries, prior-version preservation, citation pages, Docker deployment, CI engine requirements, and frontend progress.
