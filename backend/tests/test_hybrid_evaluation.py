@@ -9,6 +9,7 @@ import pytest
 
 from scripts.hybrid_evaluation import (
     EvaluationSession,
+    dataset_sha256,
     report,
     summarize,
     validate_dataset,
@@ -244,3 +245,10 @@ async def test_concurrent_runs_cannot_share_a_cleanup_journal(monkeypatch, tmp_p
         release.set()
         await task
     assert not output.with_suffix(".json.lock").exists()
+
+
+def test_dataset_hash_is_stable_across_checkout_line_endings(tmp_path):
+    lf, crlf = tmp_path / "lf.json", tmp_path / "crlf.json"
+    lf.write_bytes(b'{\n  "version": 1\n}\n')
+    crlf.write_bytes(b'{\r\n  "version": 1\r\n}\r\n')
+    assert dataset_sha256(lf) == dataset_sha256(crlf)

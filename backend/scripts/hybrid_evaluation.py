@@ -1,9 +1,15 @@
 """Validated labels, unbiased denominators, and predeclared hybrid gates."""
 
+import hashlib
 import json
 import math
 import time
 from statistics import median
+
+
+def dataset_sha256(path):
+    """Fingerprint UTF-8 labels with normalized LF newlines across checkouts."""
+    return hashlib.sha256(path.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
 
 
 class EvaluationSession:

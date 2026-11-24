@@ -31,6 +31,7 @@ from app.retrieval.tasks import embed_query
 from app.workers.celery_app import embedding_runtime_probe
 from scripts.hybrid_evaluation import (
     EvaluationSession,
+    dataset_sha256,
     report,
     validate_dataset,
     validate_output,
@@ -112,7 +113,8 @@ async def _compare(dataset, output, rounds):
     result = {
         "started_at": datetime.now(UTC).isoformat(),
         "dataset": dataset.name,
-        "dataset_sha256": hashlib.sha256(dataset.read_bytes()).hexdigest(),
+        "dataset_sha256": dataset_sha256(dataset),
+        "dataset_hash_format": "utf8-lf",
         "mode": "live_worker_and_pinecone",
         "rounds": rounds,
         "settings": {

@@ -1,7 +1,7 @@
 {
   "started_at": "2026-11-24T05:03:41.661325+00:00",
   "dataset": "retrieval-hybrid-expanded-v1.json",
-  "dataset_sha256": "ed462bbaaf91d56e8e9f35ab671cab5dacde1e26750b19fcbf8f9a293dae7306",
+  "dataset_sha256": "3c6ca1b38162fe0dc1b94dc256b61eda606d4ea4de048637f382024cc34e31be",
   "mode": "live_worker_and_pinecone",
   "rounds": 1,
   "settings": {
@@ -8685,5 +8685,7 @@
   },
   "decision": "keep_disabled",
   "cleanup_errors": [],
-  "finished_at": "2026-11-24T05:15:49.671962+00:00"
+  "finished_at": "2026-11-24T05:15:49.671962+00:00",
+  "original_dataset_sha256": "ed462bbaaf91d56e8e9f35ab671cab5dacde1e26750b19fcbf8f9a293dae7306",
+  "dataset_hash_format": "utf8-lf"
 }
