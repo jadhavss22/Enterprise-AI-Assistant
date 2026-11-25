@@ -39,3 +39,7 @@ python -m scripts.retrieval_quality_experiment \
 ```
 
 Use the existing disposable evaluation setup and an isolated worker/Redis database as in the earlier retrieval benchmarks. The runner records per-question HTTP status, document recall, precision, unrelated-query hits, latency, and optional-stage execution counts. It fails if an enabled stage was never exercised, so a silent fallback cannot be reported as a successful model evaluation. Its four profiles run sequentially and provide an initial comparison. Use repeated paired runs and a larger labeled corpus before changing defaults. The earlier reranking and rewrite results remain historical calibration evidence.
+
+## Expanded reranking evaluation
+
+The 25 November evaluation compares semantic, hybrid, semantic-reranked, and hybrid-reranked profiles on the fixed 96-question corpus and measures shared-worker contention. See the [configuration and reproduction guide](reranking-evaluation.md) and the [measured enablement decision](reranking-evaluation-decision-2026-11-25.md). Reranking remains disabled because embedding latency under mixed worker bursts failed its gate.

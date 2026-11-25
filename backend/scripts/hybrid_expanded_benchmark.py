@@ -86,17 +86,21 @@ async def worker_result(task, *args):
         await asyncio.to_thread(result.forget)
 
 
-async def compare(dataset, output, rounds):
+async def compare(dataset, output, rounds, *, experiment=None):
     lock_path = output.with_suffix(output.suffix + ".lock")
     lease = lock_path.open("x", encoding="utf-8")
     try:
-        return await _compare(dataset, output, rounds)
+        return (
+            await _compare(dataset, output, rounds)
+            if experiment is None
+            else await _compare(dataset, output, rounds, experiment=experiment)
+        )
     finally:
         lease.close()
         lock_path.unlink()
 
 
-async def _compare(dataset, output, rounds):
+async def _compare(dataset, output, rounds, *, experiment=None):
     validate_output(dataset, output)
     source = json.loads(dataset.read_text(encoding="utf-8"))
     validate_dataset(source)
@@ -223,43 +227,49 @@ async def _compare(dataset, output, rounds):
                 settings.frontend_origin,
                 settings.jwt_access_ttl_seconds,
             )
-            result["warmups"] = []
-            for hybrid in (False, True):
-                warmup = await observe(
-                    client, await session.access_token(), source["cases"][0], hybrid
-                )
-                result["warmups"].append({"hybrid": hybrid, **warmup})
-                if warmup["http"] != 200:
-                    raise RuntimeError("Live search warmup failed")
-            original_search = service.search_namespaces
-            for repeat in range(rounds):
-                for ordinal, case in enumerate(source["cases"]):
-                    pair = dict(case, round=repeat + 1)
-                    order = (True, False) if (ordinal + repeat) % 2 else (False, True)
-                    pair["first_mode"] = "hybrid" if order[0] else "semantic"
-                    for hybrid in order:
-                        errors = []
-
-                        async def search(*args, errors=errors):
-                            try:
-                                return await original_search(*args)
-                            except Exception as exc:
-                                errors.append(type(exc).__name__)
-                                raise
-
-                        with patch.object(service, "search_namespaces", search):
-                            token = await session.access_token()
-                            observation = await observe(client, token, case, hybrid)
-                        observation["semantic_errors"] = errors
-                        pair["hybrid" if hybrid else "semantic"] = observation
-                    result["cases"].append(pair)
-                    result["session_refreshes"] = session.refreshes
-                    save(output, result)
-                    print(
-                        f"{len(result['cases'])}/{rounds * len(source['cases'])} {case['id']}: semantic={pair['semantic']['http']} hybrid={pair['hybrid']['http']}",
-                        flush=True,
+            if experiment is not None:
+                await experiment(client, session, source, result, output, rounds)
+            else:
+                result["warmups"] = []
+                for hybrid in (False, True):
+                    warmup = await observe(
+                        client, await session.access_token(), source["cases"][0], hybrid
                     )
-        result.update(report(result["cases"]))
+                    result["warmups"].append({"hybrid": hybrid, **warmup})
+                    if warmup["http"] != 200:
+                        raise RuntimeError("Live search warmup failed")
+                original_search = service.search_namespaces
+                for repeat in range(rounds):
+                    for ordinal, case in enumerate(source["cases"]):
+                        pair = dict(case, round=repeat + 1)
+                        order = (
+                            (True, False) if (ordinal + repeat) % 2 else (False, True)
+                        )
+                        pair["first_mode"] = "hybrid" if order[0] else "semantic"
+                        for hybrid in order:
+                            errors = []
+
+                            async def search(*args, errors=errors):
+                                try:
+                                    return await original_search(*args)
+                                except Exception as exc:
+                                    errors.append(type(exc).__name__)
+                                    raise
+
+                            with patch.object(service, "search_namespaces", search):
+                                token = await session.access_token()
+                                observation = await observe(client, token, case, hybrid)
+                            observation["semantic_errors"] = errors
+                            pair["hybrid" if hybrid else "semantic"] = observation
+                        result["cases"].append(pair)
+                        result["session_refreshes"] = session.refreshes
+                        save(output, result)
+                        print(
+                            f"{len(result['cases'])}/{rounds * len(source['cases'])} {case['id']}: semantic={pair['semantic']['http']} hybrid={pair['hybrid']['http']}",
+                            flush=True,
+                        )
+        if experiment is None:
+            result.update(report(result["cases"]))
         result["complete"] = True
     except Exception as exc:  # noqa: BLE001 - persist safe class only, never provider bodies
         result["error_type"] = type(exc).__name__
